@@ -236,6 +236,12 @@ fieldset .legend{width:100%}
 .chip input:checked + span{background:var(--ink);color:#fff;border-color:var(--ink)}
 .chip input:focus-visible + span{outline:2px solid var(--bronze);outline-offset:2px}
 #contact-form .btn{justify-self:start}
+.consent{grid-column:1/-1;display:grid;gap:10px}
+.consent label{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:13.5px;line-height:1.5;color:var(--ink-2);cursor:pointer}
+#contact-form .consent input{width:18px;height:18px;margin:2px 0 0;padding:0;accent-color:var(--ink)}
+.fine{grid-column:1/-1;font-size:13px;color:var(--stone)}
+.fine a{color:var(--ink-2)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .sent{grid-column:1/-1;background:var(--white);border-left:3px solid var(--bronze);padding:14px 16px;border-radius:4px;font-size:15px}
 @media (max-width:900px){.contact-grid{grid-template-columns:1fr}#contact-form{grid-template-columns:1fr}}
 
@@ -537,6 +543,12 @@ fieldset .legend{width:100%}
           <label class="chip"><input type="radio" name="goal" id="g-other" value="other"><span data-i18n="f.other">Just asking</span></label>
         </fieldset>
         <div class="field full"><label for="f-msg" data-i18n="f.msg">Message</label><textarea id="f-msg" name="message" data-i18n-ph="f.msgph" placeholder="Tell me about the home you want or the home you're selling."></textarea></div>
+        <div class="hp" aria-hidden="true"><label for="f-website">Website</label><input id="f-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <div class="consent">
+          <label><input type="checkbox" name="emailConsent" id="f-cemail"><span data-i18n="f.cEmail">Email me new listings, market updates and tips. I can unsubscribe at any time.</span></label>
+          <label><input type="checkbox" name="phoneConsent" id="f-cphone"><span data-i18n="f.cPhone">I agree that Rafael Arce Gazo, REALTOR® with DH Capital Realty, may call and text me about real estate at the phone number I entered, including with automated technology. Consent is not a condition of any purchase or service. Message and data rates may apply. Reply STOP to opt out.</span></label>
+        </div>
+        <p class="fine"><span data-i18n="f.fine">Both boxes are optional. I'll reply to your message either way. See my</span> <a href="privacy.html" data-i18n="ft.privacy">Privacy notice</a>.</p>
         <button class="btn btn-dark" type="submit" data-i18n="f.send">Send message</button>
         <p class="sent" id="form-note" hidden></p>
       </form>
@@ -566,6 +578,7 @@ fieldset .legend{width:100%}
     </div>
     <div class="legal">
       <span>© 2026 Rafael Arce Gazo, REALTOR®. <span data-i18n="ft.broker">Brokered by DH Capital Realty, Nevada.</span></span>
+      <a href="privacy.html" data-i18n="ft.privacy" style="color:inherit">Privacy notice</a>
       <span class="eho"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 18 20 5l16 13M8 15v20h24V15"/><path d="M14 22h12M14 28h12"/></svg><span data-i18n="ft.eho">Equal Housing Opportunity</span></span>
     </div>
   </div>
@@ -576,6 +589,7 @@ fieldset .legend{width:100%}
   <a class="btn btn-line" href="#contact" data-i18n="bar.msg">Message</a>
 </div>
 
+<script src="leads-config.js"></script>
 <script>
 const T = {
   es: {
@@ -629,12 +643,15 @@ const T = {
     "f.msg":"Mensaje","f.msgph":"Cuéntame sobre la casa que buscas o la casa que vendes.","f.send":"Enviar mensaje",
     "bar.call":"Llamar a Rafael","bar.msg":"Mensaje",
     "ft.about":"REALTOR® al servicio del valle de Las Vegas, en español y en inglés.","ft.explore":"Explorar","ft.contact":"Contacto","ft.brokerage":"Corretaje",
-    "ft.broker":"Corretaje: DH Capital Realty, Nevada.","ft.eho":"Igualdad de oportunidades en la vivienda"
+    "ft.broker":"Corretaje: DH Capital Realty, Nevada.","ft.privacy":"Aviso de privacidad",
+    "f.cEmail":"Envíenme por correo propiedades nuevas, noticias del mercado y consejos. Puedo darme de baja en cualquier momento.",
+    "f.cPhone":"Acepto que Rafael Arce Gazo, REALTOR® de DH Capital Realty, me llame y me envíe mensajes de texto sobre bienes raíces al teléfono que escribí, incluso con tecnología automatizada. Dar mi consentimiento no es condición para ninguna compra o servicio. Pueden aplicar cargos por mensajes y datos. Responde STOP para cancelar.",
+    "f.fine":"Las dos casillas son opcionales. Responderé tu mensaje de todos modos. Lee mi","ft.eho":"Igualdad de oportunidades en la vivienda"
   },
   msgs: {
-    en:{need:"Add your name and email so Rafael can reply.", ok:"Your email app should open with your message ready to send. If it doesn't, email rafaelarcegazo@gmail.com or call (702) 335-4952.", copied:"Copied",
+    en:{need:"Add your name and email so Rafael can reply.", sent:"Thank you! Rafael got your message and will reply soon, usually within the hour during the day.", sending:"Sending…", ok:"Your email app should open with your message ready to send. If it doesn't, email rafaelarcegazo@gmail.com or call (702) 335-4952.", copied:"Copied",
         search:(g,w,p,k)=>`I'd like to ${g}${w ? ` in ${w}` : " in the Las Vegas area"}${p ? `, ${p}` : ""}. ${k==="sell" ? "Please tell me what my home could sell for." : "Please send me homes that match."}`},
-    es:{need:"Escribe tu nombre y correo para que Rafael pueda responderte.", ok:"Tu aplicación de correo debería abrirse con tu mensaje listo para enviar. Si no se abre, escribe a rafaelarcegazo@gmail.com o llama al (702) 335-4952.", copied:"Copiado",
+    es:{need:"Escribe tu nombre y correo para que Rafael pueda responderte.", sent:"¡Gracias! Rafael recibió tu mensaje y te responderá pronto, normalmente en menos de una hora durante el día.", sending:"Enviando…", ok:"Tu aplicación de correo debería abrirse con tu mensaje listo para enviar. Si no se abre, escribe a rafaelarcegazo@gmail.com o llama al (702) 335-4952.", copied:"Copiado",
         search:(g,w,p,k)=>`Me gustaría ${g}${w ? ` en ${w}` : " en el área de Las Vegas"}${p ? `, ${p}` : ""}. ${k==="sell" ? "Por favor dime en cuánto podría vender mi casa." : "Por favor envíame casas que coincidan."}`}
   },
   verbs:{en:{buy:"buy a home",sell:"sell my home",invest:"invest in a property"},es:{buy:"comprar una casa",sell:"vender mi casa",invest:"invertir en una propiedad"}}
@@ -692,15 +709,36 @@ document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", 
   try { navigator.clipboard.writeText(src.textContent).then(done, select); } catch (e) { select(); }
 }));
 
-cf.addEventListener("submit", e => {
+// Lead capture: the Apps Script link lives in leads-config.js (see crm/README.md).
+// Without it, the form falls back to opening the visitor's email app.
+const LEADS_URL = window.LEADS_URL || "";
+const formStart = Date.now();
+const firstTouch = (() => {
+  const q = new URLSearchParams(location.search), src = q.get("utm_source") || q.get("source");
+  try { if (src) sessionStorage.setItem("rag-src", src); return sessionStorage.getItem("rag-src") || (document.referrer && !document.referrer.includes(location.hostname) ? new URL(document.referrer).hostname : ""); } catch (e) { return src || ""; }
+})();
+function showNote(key){ const note = document.getElementById("form-note"); note.dataset.key = key; note.textContent = T.msgs[lang][key]; note.hidden = false; }
+
+cf.addEventListener("submit", async e => {
   e.preventDefault();
-  const f = cf, note = document.getElementById("form-note");
+  const f = cf;
   const ok = f.elements.name.value.trim() && /\S+@\S+\.\S+/.test(f.elements.email.value);
-  note.dataset.key = ok ? "ok" : "need";
-  note.textContent = T.msgs[lang][note.dataset.key];
-  note.hidden = false;
+  showNote(ok ? (LEADS_URL ? "sending" : "ok") : "need");
   if (!ok) return;
-  // Free option: hand the message to the visitor's own email app (no paid form service).
+  if (LEADS_URL) {
+    const data = { name: f.elements.name.value, email: f.elements.email.value, phone: f.elements.phone.value,
+      goal: f.querySelector('input[name="goal"]:checked').value, message: f.elements.message.value,
+      emailConsent: f.elements.emailConsent.checked, phoneConsent: f.elements.phoneConsent.checked,
+      website: f.elements.website.value, elapsed: Date.now() - formStart, language: lang,
+      source: firstTouch ? "Website (" + firstTouch + ")" : "Website", page: location.href, userAgent: navigator.userAgent };
+    try {
+      // Sent as plain text so the browser does not need a CORS preflight, which Apps Script does not answer.
+      const r = await fetch(LEADS_URL, { method: "POST", body: JSON.stringify(data) }).then(r => r.json());
+      if (r.ok) { showNote("sent"); f.reset(); return; }
+    } catch (err) { /* fall through to the email app */ }
+    showNote("ok");
+  }
+  // Free fallback: hand the message to the visitor's own email app.
   const g = f.querySelector('input[name="goal"]:checked').nextElementSibling.textContent;
   const body = [f.elements.message.value, "", f.elements.name.value, f.elements.email.value, f.elements.phone.value].join("\n");
   const href = "mailto:rafaelarcegazo@gmail.com?subject=" + encodeURIComponent("Website: " + g + " / " + f.elements.name.value) + "&body=" + encodeURIComponent(body);

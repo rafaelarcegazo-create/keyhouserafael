@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Open House Sign-In</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2322201d'/%3E%3Cpath d='M32 14 10 31v4l22-16 22 16v-4z' fill='%23b08d5b'/%3E%3Cpath d='M18 35h28v16H18z' fill='%23f6f4f0'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Figtree:wght@400;600&display=swap">
+<style>
+/* Tablet sign-in sheet for open houses. Each visitor's entry goes to the Lead CRM and the form clears for the next person. */
+:root{--bone:#f6f4f0;--white:#fff;--stone:#7a746b;--line:#e2ddd5;--ink:#22201d;--ink-2:#4a4640;--bronze:#9c7a4f;
+  --serif:"Bodoni Moda",Georgia,serif;--sans:"Figtree","Helvetica Neue",Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bone);color:var(--ink);font:18px/1.5 var(--sans)}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:22px}
+h1{font:400 clamp(34px,6vw,52px)/1.05 var(--serif);margin:0}
+.where{color:var(--ink-2);margin:8px 0 0}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.lang button{border:0;background:var(--white);padding:8px 14px;font:600 14px var(--sans);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+form{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:clamp(18px,4vw,32px);display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.full{grid-column:1/-1}
+label.f{display:grid;gap:6px;font-weight:600;font-size:16px}
+input[type=text],input[type=email],input[type=tel]{font:18px var(--sans);border:1px solid var(--line);border-radius:6px;padding:14px;width:100%;background:var(--white)}
+input:focus{outline:2px solid var(--ink);outline-offset:0}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+legend{font-weight:600;font-size:16px;margin-bottom:8px;width:100%}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:10px 18px;background:var(--white)}
+.chip input:checked + span{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip input:focus-visible + span{outline:2px solid var(--bronze);outline-offset:2px}
+.consent{display:grid;gap:12px}
+.consent label{display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:14.5px;color:var(--ink-2);cursor:pointer}
+.consent input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink)}
+.fine{font-size:13.5px;color:var(--stone)}
+.fine a{color:var(--ink-2)}
+button.go{font:600 18px var(--sans);background:var(--ink);color:#fff;border:0;border-radius:6px;padding:16px 28px;cursor:pointer;justify-self:start}
+.note{grid-column:1/-1;border-left:3px solid var(--bronze);background:var(--bone);padding:12px 14px;border-radius:4px;font-size:15px}
+.thanks{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:48px 24px;text-align:center}
+.thanks h2{font:400 40px/1.1 var(--serif);margin:0 0 10px}
+.hp{position:absolute;left:-9999px}
+footer{margin-top:22px;font-size:13px;color:var(--stone);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+@media (max-width:640px){form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 data-t="h">Welcome! Please sign in</h1>
+      <p class="where" id="where"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div>
+  </header>
+
+  <form id="f" novalidate>
+    <label class="f full"><span data-t="name">Your name</span><input type="text" name="name" autocomplete="off" required></label>
+    <label class="f"><span data-t="phone">Phone</span><input type="tel" name="phone" autocomplete="off"></label>
+    <label class="f"><span data-t="email">Email</span><input type="email" name="email" autocomplete="off"></label>
+    <fieldset class="full">
+      <legend data-t="agentQ">Are you working with a real estate agent?</legend>
+      <label class="chip"><input type="radio" name="hasAgent" value="no"><span data-t="no">No</span></label>
+      <label class="chip"><input type="radio" name="hasAgent" value="yes"><span data-t="yes">Yes</span></label>
+    </fieldset>
+    <fieldset class="full">
+      <legend data-t="goalQ">I'm here to</legend>
+      <label class="chip"><input type="radio" name="goal" value="buy" checked><span data-t="buy">Buy a home</span></label>
+      <label class="chip"><input type="radio" name="goal" value="sell"><span data-t="sell">Sell soon too</span></label>
+      <label class="chip"><input type="radio" name="goal" value="invest"><span data-t="invest">Invest</span></label>
+      <label class="chip"><input type="radio" name="goal" value="other"><span data-t="look">Just looking</span></label>
+    </fieldset>
+    <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+    <div class="consent full">
+      <label><input type="checkbox" name="emailConsent"><span data-t="cEmail">Email me new listings, market updates and tips. I can unsubscribe at any time.</span></label>
+      <label><input type="checkbox" name="phoneConsent"><span data-t="cPhone">I agree that Rafael Arce Gazo, REALTOR® with DH Capital Realty, may call and text me about real estate at the phone number I entered, including with automated technology. Consent is not a condition of any purchase or service. Message and data rates may apply. Reply STOP to opt out.</span></label>
+    </div>
+    <p class="fine full"><span data-t="fine">Signing in is optional, and so are both boxes.</span> <a href="privacy.html" target="_blank" data-t="privacy">Privacy notice</a></p>
+    <button class="go" type="submit" data-t="send">Sign in</button>
+    <p class="note" id="note" hidden></p>
+  </form>
+
+  <div class="thanks" id="thanks" hidden>
+    <h2 data-t="thanksH">Thank you!</h2>
+    <p data-t="thanksP">Enjoy the home. Rafael is here if you have any questions.</p>
+  </div>
+
+  <footer><span>Rafael Arce Gazo, REALTOR® · DH Capital Realty · Lic. S.0195953</span><span data-t="eho">Equal Housing Opportunity</span></footer>
+</div>
+
+<script src="leads-config.js"></script>
+<script>
+const ES = {
+  h: "¡Bienvenido! Por favor regístrate", name: "Tu nombre", phone: "Teléfono", email: "Correo electrónico",
+  agentQ: "¿Trabajas con un agente de bienes raíces?", no: "No", yes: "Sí", goalQ: "Vine para",
+  buy: "Comprar una casa", sell: "También vender pronto", invest: "Invertir", look: "Solo mirar",
+  cEmail: "Envíenme por correo propiedades nuevas, noticias del mercado y consejos. Puedo darme de baja en cualquier momento.",
+  cPhone: "Acepto que Rafael Arce Gazo, REALTOR® de DH Capital Realty, me llame y me envíe mensajes de texto sobre bienes raíces al teléfono que escribí, incluso con tecnología automatizada. Dar mi consentimiento no es condición para ninguna compra o servicio. Pueden aplicar cargos por mensajes y datos. Responde STOP para cancelar.",
+  fine: "Registrarte es opcional, igual que las dos casillas.", privacy: "Aviso de privacidad", send: "Registrarme",
+  thanksH: "¡Gracias!", thanksP: "Disfruta la casa. Rafael está aquí si tienes preguntas.", eho: "Igualdad de oportunidades en la vivienda",
+  need: "Escribe tu nombre y un teléfono o correo.", fail: "No se pudo enviar. Por favor avísale a Rafael.", setup: "Falta configurar el enlace del CRM en leads-config.js.", at: "Casa abierta: "
+};
+const EN = { need: "Please add your name and a phone or email.", fail: "That didn't go through. Please let Rafael know.", setup: "The CRM link is not set up yet in leads-config.js.", at: "Open house: " };
+document.querySelectorAll("[data-t]").forEach(el => EN[el.dataset.t] = el.textContent);
+let lang = "en", started = Date.now();
+const property = (new URLSearchParams(location.search).get("property") || "").slice(0, 120);
+const where = document.getElementById("where");
+function setLang(l) {
+  lang = l; document.documentElement.lang = l;
+  const d = l === "es" ? ES : EN;
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = d[el.dataset.t]);
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+  where.textContent = property ? d.at + property : "";
+}
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+setLang("en");
+
+const f = document.getElementById("f"), note = document.getElementById("note"), thanks = document.getElementById("thanks");
+const say = k => { note.textContent = (lang === "es" ? ES : EN)[k]; note.hidden = false; };
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const el = f.elements, email = el.email.value.trim(), digits = el.phone.value.replace(/\D/g, "");
+  if (!el.name.value.trim() || !(/\S+@\S+\.\S+/.test(email) || digits.length >= 10)) return say("need");
+  if (!window.LEADS_URL) return say("setup");
+  const agent = f.querySelector('input[name="hasAgent"]:checked');
+  const data = { name: el.name.value, email, phone: el.phone.value, goal: f.querySelector('input[name="goal"]:checked').value,
+    hasAgent: agent ? agent.value : "", emailConsent: el.emailConsent.checked, phoneConsent: el.phoneConsent.checked,
+    website: el.website.value, elapsed: Date.now() - started, language: lang, source: "Open house", property,
+    page: location.href, userAgent: navigator.userAgent };
+  f.querySelector("button.go").disabled = true;
+  try {
+    const r = await fetch(window.LEADS_URL, { method: "POST", body: JSON.stringify(data) }).then(r => r.json());
+    if (!r.ok) throw new Error();
+    // Clear everything right away so the next visitor never sees this person's details.
+    f.reset(); note.hidden = true; f.hidden = true; thanks.hidden = false;
+    setTimeout(() => { thanks.hidden = true; f.hidden = false; setLang("en"); started = Date.now(); f.elements.name.focus(); }, 6000);
+  } catch (err) { say("fail"); }
+  f.querySelector("button.go").disabled = false;
+});
+</script>
+</body>
+</html>
