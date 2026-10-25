@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_blank">
+<title>Lead CRM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bone:#f6f4f0;--white:#fff;--sand:#e9e4dc;--stone:#7a746b;--line:#e2ddd5;--ink:#22201d;--ink-2:#4a4640;
+  --bronze:#9c7a4f;--ok:#2f6b45;--ok-bg:#e7f1ea;--warn:#8a5a12;--warn-bg:#fbf1dd;--bad:#9b2c2c;--bad-bg:#f8e6e4;
+  --sans:"Figtree","Helvetica Neue",Arial,system-ui,sans-serif;color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bone);color:var(--ink);font:15px/1.5 var(--sans)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:600}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:5;background:var(--white);border-bottom:1px solid var(--line)}
+.top .in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 16px}
+.brand{font-weight:700;font-size:17px;margin-right:auto}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--stone)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:0 12px;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:10px 12px;border-bottom:2px solid transparent;font-weight:600;color:var(--stone);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--bronze)}
+.tabs .n{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--sand);font-size:12px;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--white);border-radius:6px;padding:8px 14px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn.danger{color:var(--bad)}
+main{padding:16px;max-width:1240px;margin:0 auto}
+.banner{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.banner p{margin:2px 0}
+.groups{display:grid;gap:16px}
+.group h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--stone);margin:6px 0 8px}
+.group h2 .n{color:var(--ink)}
+.cards{display:grid;gap:8px}
+.card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;text-align:left;width:100%}
+.card:hover{border-color:var(--ink)}
+.card b{font-size:16px}
+.card .meta{color:var(--stone);font-size:13.5px;grid-column:1}
+.card .when{font-size:13px;font-weight:600;text-align:right}
+.when.late{color:var(--bad)}.when.now{color:var(--bronze)}
+.empty{color:var(--stone);background:var(--white);border:1px dashed var(--line);border-radius:8px;padding:14px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--sand);font-size:12px;font-weight:600;color:var(--ink-2)}
+.pill.hot{background:var(--bad-bg);color:var(--bad)}.pill.cold{background:#e6ecf2;color:#34506b}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.bar input,.bar select{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--white);min-width:0}
+.bar input[type=search]{flex:1 1 220px}
+.tablewrap{overflow-x:auto;background:var(--white);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--stone);font-weight:600;background:var(--bone)}
+tbody tr{cursor:pointer}tbody tr:hover{background:var(--bone)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--sand);border-radius:8px;padding:8px;display:grid;gap:6px;align-content:start;min-height:200px}
+.col h3{font-size:13px;padding:4px 4px 2px;display:flex;justify-content:space-between}
+.col .card{grid-template-columns:1fr;padding:9px 10px}
+.col .card b{font-size:14.5px}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:12px;align-content:start}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.stat span{display:block;color:var(--stone);font-size:13px}.stat b{font-size:26px;font-weight:600}
+label.f{display:grid;gap:4px;font-weight:600;font-size:13px;min-width:0}
+label.f input,label.f select,label.f textarea{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--white);font-weight:400;font-size:15px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form .full{grid-column:1/-1}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.check input{margin-top:4px}
+.hint{color:var(--stone);font-size:13px;font-weight:400}
+.status{border-radius:8px;padding:10px 12px;font-size:14px}
+.status.ok{background:var(--ok-bg);color:var(--ok)}.status.no{background:var(--bad-bg);color:var(--bad)}
+.status b{display:block}
+.status ul{margin:4px 0 0;padding-left:18px}
+.warnlist{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:13.5px;margin:0;list-style:none}
+/* Lead drawer */
+.scrim{position:fixed;inset:0;background:rgba(34,32,29,.35);z-index:20;display:flex;justify-content:flex-end}
+.drawer{background:var(--bone);width:min(760px,100%);height:100%;overflow-y:auto;box-shadow:-8px 0 30px rgba(0,0,0,.15)}
+.drawer header{position:sticky;top:0;background:var(--white);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center;z-index:2}
+.drawer header h2{font-size:20px;margin-right:auto;overflow-wrap:anywhere}
+.drawer .body{padding:16px;display:grid;gap:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.timeline li{border-left:2px solid var(--line);padding:2px 0 2px 12px}
+.timeline .t{font-size:12.5px;color:var(--stone)}
+.timeline .d{white-space:pre-wrap;overflow-wrap:anywhere}
+.modal{background:var(--white);border-radius:10px;width:min(620px,calc(100% - 32px));margin:auto;max-height:calc(100% - 32px);overflow-y:auto;padding:18px;display:grid;gap:12px}
+.scrim.center{justify-content:center;align-items:center}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;z-index:50;max-width:calc(100% - 32px)}
+.toast.err{background:var(--bad)}
+.loading{padding:40px;text-align:center;color:var(--stone)}
+details summary{cursor:pointer;font-weight:600}
+@media (max-width:720px){.grid2,.form{grid-template-columns:1fr}.card{grid-template-columns:1fr}.card .when{text-align:left}main{padding:12px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="in">
+    <div class="brand">Lead CRM<small id="who"></small></div>
+    <button type="button" class="btn" id="refresh">Refresh</button>
+    <button type="button" class="btn dark" id="add">+ Add lead</button>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-view="today" aria-selected="true">Today<span class="n" id="n-today">0</span></button>
+    <button role="tab" data-view="leads" aria-selected="false">All leads<span class="n" id="n-all">0</span></button>
+    <button role="tab" data-view="pipeline" aria-selected="false">Pipeline</button>
+    <button role="tab" data-view="campaigns" aria-selected="false">Email campaigns</button>
+    <button role="tab" data-view="reports" aria-selected="false">Results</button>
+    <button role="tab" data-view="rules" aria-selected="false">Contact rules</button>
+  </nav>
+</div>
+<main id="main"><div class="loading">Loading your leads…</div></main>
+
+<script>
+const S = { data: null, view: "today", filters: { q: "", stage: "", goal: "", source: "" } };
+const $ = s => document.querySelector(s);
+const GOAL_LABEL = { buy: "Buy", sell: "Sell", invest: "Invest", rent: "Rent", other: "Other" };
+
+// ---------- Server calls ----------
+function call(action, payload) {
+  return new Promise((resolve, reject) => {
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(e && e.message ? e : new Error(String(e)))).api(action, payload || {});
+  });
+}
+function toast(msg, err) {
+  const t = document.createElement("div");
+  t.className = "toast" + (err ? " err" : ""); t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t); setTimeout(() => t.remove(), err ? 6000 : 3000);
+}
+async function load() {
+  try {
+    S.data = await call("bootstrap");
+    $("#who").textContent = S.data.settings.agentName + " · " + S.data.settings.brokerage;
+    render();
+  } catch (e) { $("#main").replaceChildren(h("div", { class: "empty" }, "Could not load: " + e.message)); }
+}
+function upsert(lead) {
+  const i = S.data.leads.findIndex(l => l.id === lead.id);
+  if (i >= 0) S.data.leads[i] = lead; else S.data.leads.push(lead);
+}
+
+// ---------- Tiny element builder (always uses text, never raw HTML, because lead data comes from the public) ----------
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const k in attrs || {}) {
+    const v = attrs[k];
+    if (v === false || v === null || v === undefined) continue;
+    if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "value") el.value = v;
+    else if (k === "checked") el.checked = !!v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  kids.flat(9).forEach(c => { if (c !== null && c !== undefined && c !== false) el.append(c instanceof Node ? c : String(c)); });
+  return el;
+}
+
+// ---------- Dates ----------
+const dayKey = d => { const x = new Date(d); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+const todayKey = () => dayKey(new Date());
+function fmtDate(iso) { return iso ? new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: new Date(iso).getFullYear() === new Date().getFullYear() ? undefined : "numeric" }) : "—"; }
+function fmtWhen(iso) { return iso ? new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : ""; }
+function ago(iso) {
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 60) return m + " min ago"; if (m < 1440) return Math.round(m / 60) + " h ago"; return Math.round(m / 1440) + " days ago";
+}
+function dueLabel(iso) {
+  if (!iso) return { text: "No follow-up", cls: "" };
+  const days = Math.round((new Date(dayKey(iso)) - new Date(todayKey())) / 864e5);
+  if (days < 0) return { text: -days + (days === -1 ? " day" : " days") + " overdue", cls: "late" };
+  if (days === 0) return { text: "Due today", cls: "now" };
+  if (days === 1) return { text: "Tomorrow", cls: "" };
+  return { text: "In " + days + " days", cls: "" };
+}
+const toInputDate = iso => iso ? dayKey(iso) : "";
+const fromInputDate = v => v ? new Date(v + "T09:00:00").toISOString() : "";
+
+// ---------- Lists ----------
+const active = l => l.stage !== "Lost";
+function todayGroups() {
+  const leads = S.data.leads.filter(active), t = todayKey(), week = dayKey(Date.now() + 7 * 864e5);
+  const fresh = leads.filter(l => l.stage === "New" && !(Number(l.attempts) > 0)).sort((a, b) => new Date(b.created) - new Date(a.created));
+  const rest = leads.filter(l => !fresh.includes(l) && l.nextFollowUp);
+  const by = (a, b) => new Date(a.nextFollowUp) - new Date(b.nextFollowUp);
+  return {
+    fresh,
+    overdue: rest.filter(l => dayKey(l.nextFollowUp) < t).sort(by),
+    today: rest.filter(l => dayKey(l.nextFollowUp) === t).sort(by),
+    soon: rest.filter(l => dayKey(l.nextFollowUp) > t && dayKey(l.nextFollowUp) <= week).sort(by)
+  };
+}
+function leadCard(l, mode) {
+  const due = mode === "fresh" ? { text: "Came in " + ago(l.created), cls: "now" } : dueLabel(l.nextFollowUp);
+  const temp = l.temperature ? h("span", { class: "pill " + String(l.temperature).toLowerCase() }, l.temperature) : null;
+  return h("button", { type: "button", class: "card", onclick: () => openLead(l.id) },
+    h("div", null, h("b", null, l.name || "(no name)"), " ", temp),
+    h("div", { class: "when " + due.cls }, due.text),
+    h("div", { class: "meta" }, [GOAL_LABEL[l.goal] || "", l.area, l.source, l.stage, l.language === "es" ? "Español" : ""].filter(Boolean).join(" · ")));
+}
+
+// ---------- Views ----------
+function render() {
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === S.view)));
+  const g = todayGroups();
+  $("#n-today").textContent = g.fresh.length + g.overdue.length + g.today.length;
+  $("#n-all").textContent = S.data.leads.length;
+  const banner = S.data.warnings.length ? h("div", { class: "banner" }, S.data.warnings.map(w => h("p", null, "⚠ " + w))) : null;
+  const view = { today: viewToday, leads: viewLeads, pipeline: viewPipeline, campaigns: viewCampaigns, reports: viewReports, rules: viewRules }[S.view]();
+  $("#main").replaceChildren(...[banner, view].filter(Boolean));
+}
+
+function viewToday() {
+  const g = todayGroups();
+  const block = (title, list, mode, emptyText) => h("section", { class: "group" },
+    h("h2", null, title, " ", h("span", { class: "n" }, "(" + list.length + ")")),
+    list.length ? h("div", { class: "cards" }, list.map(l => leadCard(l, mode))) : h("div", { class: "empty" }, emptyText));
+  return h("div", { class: "groups" },
+    block("New leads: reach out now", g.fresh, "fresh", "No new leads waiting. Nice work."),
+    block("Overdue", g.overdue, "", "Nothing overdue."),
+    block("Due today", g.today, "", "Nothing else due today."),
+    block("Coming up this week", g.soon, "", "Nothing scheduled this week."));
+}
+
+function filteredLeads() {
+  const f = S.filters, q = f.q.trim().toLowerCase();
+  return S.data.leads.filter(l =>
+    (!f.stage || l.stage === f.stage) && (!f.goal || l.goal === f.goal) && (!f.source || l.source === f.source) &&
+    (!q || [l.name, l.email, l.phone, l.area, l.tags, l.notes].join(" ").toLowerCase().includes(q))
+  ).sort((a, b) => new Date(b.created) - new Date(a.created));
+}
+function select(name, options, value, blank, onchange) {
+  return h("select", { "aria-label": name, onchange },
+    blank !== undefined ? h("option", { value: "" }, blank) : null,
+    options.map(o => { const [v, t] = Array.isArray(o) ? o : [o, o]; const opt = h("option", { value: v }, t); if (v === value) opt.selected = true; return opt; }));
+}
+function viewLeads() {
+  const L = S.data.lists, f = S.filters;
+  const body = h("tbody");
+  const fill = () => {
+    const rows = filteredLeads();
+    body.replaceChildren(...rows.map(l => h("tr", { onclick: () => openLead(l.id), tabindex: "0", onkeydown: e => { if (e.key === "Enter") openLead(l.id); } },
+      h("td", null, h("b", null, l.name), h("div", { class: "hint" }, [l.phone, l.email].filter(Boolean).join(" · "))),
+      h("td", null, l.stage), h("td", null, GOAL_LABEL[l.goal] || ""), h("td", null, l.area || ""), h("td", null, l.source || ""),
+      h("td", null, h("span", { class: "when " + dueLabel(l.nextFollowUp).cls }, l.nextFollowUp ? fmtDate(l.nextFollowUp) : "—")),
+      h("td", null, fmtDate(l.lastContact)))));
+    if (!rows.length) body.append(h("tr", null, h("td", { colspan: "7", class: "hint" }, S.data.leads.length ? "No leads match." : "No leads yet. They appear here as soon as someone uses your website form, or add one with + Add lead.")));
+  };
+  const set = k => e => { f[k] = e.target.value; fill(); };
+  const bar = h("div", { class: "bar" },
+    h("input", { type: "search", placeholder: "Search name, phone, email, area, tags…", value: f.q, oninput: set("q"), "aria-label": "Search" }),
+    select("Stage", L.stages, f.stage, "All stages", set("stage")),
+    select("Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), f.goal, "All goals", set("goal")),
+    select("Source", L.sources, f.source, "All sources", set("source")),
+    h("a", { class: "btn", href: S.data.sheetUrl }, "Open the sheet"));
+  fill();
+  return h("div", null, bar, h("div", { class: "tablewrap" }, h("table", null,
+    h("thead", null, h("tr", null, ["Name", "Stage", "Goal", "Area", "Source", "Next follow-up", "Last contact"].map(t => h("th", null, t)))), body)));
+}
+
+function viewPipeline() {
+  return h("div", { class: "board" }, S.data.lists.stages.map(st => {
+    const list = S.data.leads.filter(l => l.stage === st).sort((a, b) => new Date(a.nextFollowUp || 8e15) - new Date(b.nextFollowUp || 8e15));
+    return h("section", { class: "col", "aria-label": st }, h("h3", null, st, h("span", null, list.length)), list.map(l => leadCard(l)));
+  }));
+}
+
+function viewCampaigns() {
+  const L = S.data.lists, emailT = S.data.templates.filter(t => t.channel === "email" && t.key !== "welcome");
+  const keys = [...new Map(emailT.map(t => [t.key, t])).values()];
+  const st = { key: keys[0] ? keys[0].key : "", filter: { stage: "", goal: "", language: "", source: "", tag: "" } };
+  const out = h("div", { class: "panel" }, h("p", { class: "hint" }, "Pick a template and a group, then preview who will get it."));
+  const preview = async () => {
+    out.replaceChildren(h("p", { class: "hint" }, "Checking permissions…"));
+    try {
+      const r = await call("campaignPreview", st);
+      const skipped = Object.entries(r.skipped);
+      out.replaceChildren(
+        h("div", { class: "stats" }, h("div", { class: "stat" }, h("span", null, "Will receive it"), h("b", null, r.eligible)),
+          h("div", { class: "stat" }, h("span", null, "Left out"), h("b", null, skipped.reduce((n, [, c]) => n + c, 0))),
+          h("div", { class: "stat" }, h("span", null, "Emails left today (Google limit)"), h("b", null, r.quota))),
+        r.names.length ? h("p", { class: "hint" }, "Includes " + r.names.join(", ") + (r.eligible > r.names.length ? " and " + (r.eligible - r.names.length) + " more." : ".")) : null,
+        skipped.length ? h("ul", { class: "warnlist" }, skipped.map(([why, n]) => h("li", null, n + " left out: " + why))) : null,
+        r.blocker ? h("div", { class: "status no" }, r.blocker) : null,
+        r.eligible > r.quota ? h("p", { class: "hint" }, "Only " + r.quota + " can go out today. Send again tomorrow for the rest. People who already got it today will get it again, so narrow the group by tag if needed.") : null,
+        h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", disabled: !!r.blocker || !r.eligible || !r.quota, onclick: send }, "Send to " + Math.min(r.eligible, r.quota) + " people")));
+    } catch (e) { out.replaceChildren(h("div", { class: "status no" }, e.message)); }
+  };
+  const send = async () => {
+    if (!confirm("Send this email now? Each person gets their own copy, in their language, with your address and an unsubscribe link.")) return;
+    out.replaceChildren(h("p", { class: "hint" }, "Sending… keep this window open."));
+    try {
+      const r = await call("campaignSend", st);
+      out.replaceChildren(h("div", { class: "status ok" }, h("b", null, "Sent " + r.sent + " emails."), r.left > 0 ? r.left + " still waiting for tomorrow's limit." : "", r.failed ? " " + r.failed + " could not be sent." : ""));
+      S.data = await call("bootstrap");
+    } catch (e) { out.replaceChildren(h("div", { class: "status no" }, e.message)); }
+  };
+  const tplPreview = h("div", { class: "hint", style: "white-space:pre-wrap" });
+  const showTpl = () => { const t = emailT.find(x => x.key === st.key && x.language === "en") || emailT.find(x => x.key === st.key); tplPreview.textContent = t ? "Subject: " + t.subject + "\n\n" + t.body : ""; };
+  showTpl();
+  const set = k => e => { st.filter[k] = e.target.value; };
+  return h("div", { class: "grid2" },
+    h("div", { class: "panel" },
+      h("h3", null, "Send an email to a group"),
+      h("label", { class: "f" }, "Template", select("Template", keys.map(t => [t.key, t.name + (t.kind === "marketing" ? " (marketing)" : "")]), st.key, undefined, e => { st.key = e.target.value; showTpl(); })),
+      h("div", { class: "form" },
+        h("label", { class: "f" }, "Stage", select("Stage", L.stages, "", "Any", set("stage"))),
+        h("label", { class: "f" }, "Goal", select("Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), "", "Any", set("goal"))),
+        h("label", { class: "f" }, "Language", select("Language", [["en", "English"], ["es", "Español"]], "", "Any", set("language"))),
+        h("label", { class: "f" }, "Source", select("Source", L.sources, "", "Any", set("source"))),
+        h("label", { class: "f full" }, "Tag (optional)", h("input", { placeholder: "e.g. summerlin-buyers", oninput: set("tag") }))),
+      h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: preview }, "Preview who gets it")),
+      h("details", null, h("summary", null, "See the template"), tplPreview),
+      h("p", { class: "hint" }, "Each person gets the English or Spanish version based on their language. Edit wording on the Templates tab of your sheet. Only people who gave permission or contacted you are included; unsubscribed people and people working with another agent are always left out.")),
+    out);
+}
+
+function viewReports() {
+  const leads = S.data.leads, since30 = Date.now() - 30 * 864e5;
+  const recent = leads.filter(l => new Date(l.created) >= since30);
+  const reached = ["Contacted", "Nurture", "Appointment", "Active client", "Under contract", "Closed"];
+  const apptPlus = ["Appointment", "Active client", "Under contract", "Closed"];
+  const responded = recent.filter(l => l.firstResponse).map(l => (new Date(l.firstResponse) - new Date(l.created)) / 60000).sort((a, b) => a - b);
+  const median = responded.length ? responded[Math.floor(responded.length / 2)] : null;
+  const fmtMins = m => m === null ? "—" : m < 60 ? Math.round(m) + " min" : m < 1440 ? (m / 60).toFixed(1) + " h" : (m / 1440).toFixed(1) + " days";
+  const pct = (a, b) => b ? Math.round(100 * a / b) + "%" : "—";
+  const bySource = {};
+  leads.forEach(l => { const s = l.source || "Unknown"; const r = bySource[s] || (bySource[s] = { n: 0, reached: 0, appt: 0, closed: 0 }); r.n++; if (reached.includes(l.stage)) r.reached++; if (apptPlus.includes(l.stage)) r.appt++; if (l.stage === "Closed") r.closed++; });
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const end = Date.now() - i * 7 * 864e5, start = end - 7 * 864e5;
+    weeks.push([new Date(start + 864e5).toLocaleDateString(undefined, { month: "short", day: "numeric" }), leads.filter(l => { const c = new Date(l.created); return c >= start && c < end; }).length]);
+  }
+  return h("div", { class: "groups" },
+    h("div", { class: "stats" },
+      h("div", { class: "stat" }, h("span", null, "New leads, last 30 days"), h("b", null, recent.length)),
+      h("div", { class: "stat" }, h("span", null, "Typical time to first contact"), h("b", null, fmtMins(median))),
+      h("div", { class: "stat" }, h("span", null, "Never contacted (30 days)"), h("b", null, recent.filter(l => !l.firstResponse).length)),
+      h("div", { class: "stat" }, h("span", null, "Active clients + under contract"), h("b", null, leads.filter(l => ["Active client", "Under contract"].includes(l.stage)).length)),
+      h("div", { class: "stat" }, h("span", null, "Closed"), h("b", null, leads.filter(l => l.stage === "Closed").length))),
+    h("section", { class: "group" }, h("h2", null, "Which sources work"),
+      h("div", { class: "tablewrap" }, h("table", null,
+        h("thead", null, h("tr", null, h("th", null, "Source"), ["Leads", "Reached", "Appointment or better", "Closed", "Close rate"].map(t => h("th", { class: "num" }, t)))),
+        h("tbody", null, Object.entries(bySource).sort((a, b) => b[1].n - a[1].n).map(([s, r]) => h("tr", { style: "cursor:default" },
+          h("td", null, s), h("td", { class: "num" }, r.n), h("td", { class: "num" }, r.reached), h("td", { class: "num" }, r.appt), h("td", { class: "num" }, r.closed), h("td", { class: "num" }, pct(r.closed, r.n)))))))),
+    h("section", { class: "group" }, h("h2", null, "New leads per week"),
+      h("div", { class: "tablewrap" }, h("table", { style: "min-width:0" },
+        h("thead", null, h("tr", null, h("th", null, "Week starting"), h("th", { class: "num" }, "New leads"))),
+        h("tbody", null, weeks.map(([w, n]) => h("tr", { style: "cursor:default" }, h("td", null, w), h("td", { class: "num" }, n))))))));
+}
+
+function viewRules() {
+  const s = S.data.settings, li = t => h("li", null, t);
+  return h("div", { class: "grid2" },
+    h("div", { class: "panel" }, h("h3", null, "Calls and texts"), h("ul", null,
+      li("Only between " + hour(s.quietStart) + " and " + hour(s.quietEnd) + " in the person's time zone. The Call and Text buttons are off outside those hours."),
+      li("Before calling or texting, the CRM checks for one of these: their written consent (website checkbox or signed form), a recent relationship (they asked you about real estate in the last 3 months, or closed with you in the last 18 months), or a National Do Not Call Registry check in the last 31 days showing they are not on it."),
+      li("If anyone says stop, press \"They asked to stop\" right away. The CRM blocks their number for good, even if they are added again later."),
+      li("Texts go one at a time from your own phone. Mass or automated texting needs written consent from each person and a registered texting service, so this CRM does not do it."),
+      li("Say who you are and that you are with " + s.brokerage + " at the start of every call. Keep your caller ID on."))),
+    h("div", { class: "panel" }, h("h3", null, "Email"), h("ul", null,
+      li("Campaigns only go to people who said yes on your website, or who contacted or worked with you, and never to anyone who unsubscribed."),
+      li("Every marketing email automatically includes your name, " + s.brokerage + ", your license number, your postal address, Equal Housing Opportunity, and a one-click unsubscribe link."),
+      li("Unsubscribes take effect instantly (the law allows 10 business days)."),
+      li("Use honest subject lines that match the email."))),
+    h("div", { class: "panel" }, h("h3", null, "Fair housing"), h("ul", null,
+      li("Treat every lead the same. Never note or filter people by race, color, religion, sex, disability, familial status, national origin, sexual orientation, gender identity or expression, or ancestry."),
+      li("Describe homes, not the people you think should live there. Avoid words like \"perfect for families\" or \"safe neighborhood\" in notes and emails."),
+      li("Speaking Spanish is a service you offer. Never use language to decide which homes someone sees."))),
+    h("div", { class: "panel" }, h("h3", null, "Privacy and records"), h("ul", null,
+      li("Your website links to a privacy notice (required for Nevada website operators, NRS 603A.340). Lead data is never sold."),
+      li("If someone asks you to delete their data, open their lead and use \"Delete (privacy request)\". A do-not-contact record is kept so they are not contacted again."),
+      li("Keep the sheet private, turn on 2-Step Verification on your Google account, and only share it with your team."),
+      li("If someone says they already have an agent, the CRM flags it. Do not try to take another agent's client (Code of Ethics, Article 16)."),
+      li("This is a practical guide, not legal advice. Ask your broker to review it."))));
+}
+const hour = x => { x = Number(x); return (x % 12 || 12) + (x < 12 ? "am" : "pm"); };
+
+// ---------- Lead drawer ----------
+async function openLead(id) {
+  const scrim = h("div", { class: "scrim", onclick: e => { if (e.target === scrim) close(); } });
+  const drawer = h("div", { class: "drawer", role: "dialog", "aria-modal": "true", "aria-label": "Lead details" }, h("div", { class: "loading" }, "Loading…"));
+  const close = () => { scrim.remove(); document.removeEventListener("keydown", esc); render(); };
+  const esc = e => { if (e.key === "Escape" && !document.querySelector(".scrim.center")) close(); };
+  document.addEventListener("keydown", esc);
+  scrim.append(drawer); document.body.append(scrim);
+  try { drawLead(drawer, await call("getLead", { id }), close); }
+  catch (e) { drawer.replaceChildren(h("div", { class: "loading" }, e.message), h("button", { type: "button", class: "btn", onclick: close }, "Close")); }
+}
+
+function drawLead(drawer, res, close) {
+  const l = res.lead, L = S.data.lists, pc = l.phoneCheck, ec = l.emailCheck;
+  upsert(l);
+  const redraw = r => drawLead(drawer, r, close);
+  const run = async (action, payload, okMsg) => { try { const r = await call(action, payload); if (r.lead) redraw(r); toast(okMsg); return r; } catch (e) { toast(e.message, true); } };
+
+  // Log form, filled in by the Call / Text / Email buttons too.
+  const log = { type: h("select", { "aria-label": "What you did" }, L.types.map(t => h("option", null, t))),
+    outcome: h("select", { "aria-label": "Result" }, h("option", { value: "" }, "—"), L.outcomes.map(t => h("option", null, t))),
+    details: h("textarea", { placeholder: "What did you talk about? Next steps?", "aria-label": "Notes" }),
+    next: h("input", { type: "date", "aria-label": "Next follow-up" }) };
+  const logBox = h("section", { class: "panel" }, h("h3", null, "Log what you did"),
+    h("div", { class: "form" }, h("label", { class: "f" }, "What", log.type), h("label", { class: "f" }, "Result", log.outcome),
+      h("label", { class: "f full" }, "Notes", log.details),
+      h("label", { class: "f" }, "Next follow-up", log.next, h("span", { class: "hint" }, "Leave blank and the CRM picks the date for you."))),
+    h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: async () => {
+      const r = await run("logActivity", { id: l.id, type: log.type.value, outcome: log.outcome.value, details: log.details.value, next: fromInputDate(log.next.value) }, "Saved");
+      if (r) { const n = r.lead.nextFollowUp; toast(n ? "Saved. Next follow-up: " + fmtDate(n) : "Saved. No more follow-ups scheduled."); }
+    } }, "Save")));
+  const prefill = (type, outcome) => { log.type.value = type; log.outcome.value = outcome || ""; logBox.scrollIntoView({ behavior: "smooth" }); log.details.focus({ preventScroll: true }); };
+
+  const digits = String(l.phone || "").replace(/\D/g, "");
+  const phoneStatus = h("div", { class: "status " + (pc.ok ? "ok" : "no") },
+    h("b", null, pc.ok ? "OK to call or text now" : "Do not call or text right now"),
+    pc.ok ? pc.basis : h("ul", null, pc.reasons.map(r => h("li", null, r))));
+  const needsDnc = !pc.ok && pc.reasons.some(r => /Registry/.test(r)) && l.phoneOptOut !== "Yes";
+  const emailStatus = h("div", { class: "status " + (ec.ok ? "ok" : "no") }, h("b", null, ec.ok ? "OK to email" : "Do not email"), ec.ok ? ec.basis : ec.reasons.join(" "));
+  const warnings = pc.warnings || [];
+
+  const callBtn = h("a", { class: "btn dark", href: "tel:" + digits, "aria-disabled": String(!pc.ok), onclick: () => setTimeout(() => prefill("Call"), 300) }, "Call " + (l.phone || ""));
+  const textBtn = h("button", { type: "button", class: "btn", disabled: !pc.ok, onclick: () => textComposer(l, () => prefill("Text", "Sent")) }, "Text");
+  const emailBtn = h("button", { type: "button", class: "btn", disabled: !ec.ok, onclick: () => emailComposer(l, redraw) }, "Email");
+
+  // Details form
+  const F = {};
+  const inp = (k, label, attrs) => h("label", { class: "f" + (attrs && attrs.full ? " full" : "") }, label, F[k] = h("input", Object.assign({ value: l[k] || "" }, attrs, { full: null })));
+  const sel = (k, label, opts, blank) => h("label", { class: "f" }, label, F[k] = select(label, opts, l[k] || "", blank));
+  const details = h("section", { class: "panel" }, h("h3", null, "Details"),
+    h("div", { class: "form" },
+      inp("name", "Name"), inp("phone", "Phone", { type: "tel" }), inp("email", "Email", { type: "email", full: true }),
+      sel("language", "Language", [["en", "English"], ["es", "Español"]]), sel("goal", "Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), "—"),
+      inp("area", "Area / neighborhood"), inp("price", "Price range"), inp("timeline", "Timeline", { placeholder: "e.g. 3–6 months" }),
+      sel("source", "Source", [...new Set([...L.sources, l.source].filter(Boolean))], "—"),
+      sel("temperature", "Temperature", ["Hot", "Warm", "Cold"], "—"), inp("referredBy", "Referred by"),
+      h("label", { class: "f" }, "Closing date", F.closedOn = h("input", { type: "date", value: toInputDate(l.closedOn) })),
+      h("label", { class: "f" }, "Next follow-up", F.nextFollowUp = h("input", { type: "date", value: toInputDate(l.nextFollowUp) })),
+      inp("tags", "Tags (comma separated)", { full: true, placeholder: "e.g. first-time buyer, summerlin" }),
+      h("label", { class: "f full" }, "Notes", F.notes = h("textarea", { value: l.notes || "" }), h("span", { class: "hint" }, "Fair housing: note what they want in a home, never personal traits like family, religion, origin or disability.")),
+      h("label", { class: "check full" }, F.hasAgent = h("input", { type: "checkbox", checked: l.hasAgent === "Yes" }), "They already work with another agent")),
+    h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: () => {
+      const p = { id: l.id, closedOn: fromInputDate(F.closedOn.value), nextFollowUp: fromInputDate(F.nextFollowUp.value), hasAgent: F.hasAgent.checked };
+      ["name", "phone", "email", "language", "goal", "area", "price", "timeline", "source", "temperature", "referredBy", "tags", "notes"].forEach(k => p[k] = F[k].value);
+      if (p.phone.replace(/\D/g, "") !== digits && l.phoneConsent === "Yes" && !confirm("Changing the phone number removes the call/text permission, because consent belongs to the old number. Continue?")) return;
+      run("saveLead", p, "Saved");
+    } }, "Save details")));
+
+  const stageSel = select("Stage", L.stages, l.stage, undefined, e => run("saveLead", { id: l.id, stage: e.target.value }, "Stage changed to " + e.target.value));
+
+  const consentInfo = h("ul", { class: "hint", style: "margin:0;padding-left:18px" },
+    h("li", null, "Email permission: " + (l.emailConsent === "Yes" ? "yes, " + fmtDate(l.emailConsentAt) : "no") + (l.unsubscribed === "Yes" ? " (unsubscribed)" : "")),
+    h("li", null, "Call/text written consent: " + (l.phoneConsent === "Yes" ? "yes, " + fmtDate(l.phoneConsentAt) : "no") + (l.phoneOptOut === "Yes" ? " (asked to stop)" : "")),
+    h("li", null, "Last inquiry: " + fmtDate(l.lastInquiry) + " · National DNC: " + (l.dncCheckedOn ? (l.onDnc === "Yes" ? "on the list" : "not on the list") + ", checked " + fmtDate(l.dncCheckedOn) : "not checked")));
+
+  drawer.replaceChildren(
+    h("header", null, h("h2", null, l.name), stageSel, h("button", { type: "button", class: "btn", onclick: close, "aria-label": "Close" }, "✕")),
+    h("div", { class: "body" },
+      h("p", { class: "hint" }, "Added " + fmtWhen(l.created) + " from " + (l.source || "—") + " · " + (Number(l.attempts) || 0) + " contact attempts · Next follow-up: " + (l.nextFollowUp ? fmtDate(l.nextFollowUp) + " (" + dueLabel(l.nextFollowUp).text.toLowerCase() + ")" : "none")),
+      l.message ? h("section", { class: "panel" }, h("h3", null, "Their message"), h("div", { style: "white-space:pre-wrap;overflow-wrap:anywhere" }, l.message)) : null,
+      h("section", { class: "panel" }, h("h3", null, "Reach out"),
+        h("div", { class: "grid2" }, phoneStatus, emailStatus),
+        warnings.length ? h("ul", { class: "warnlist" }, warnings.map(w => h("li", null, w))) : null,
+        h("div", { class: "actions" }, digits ? callBtn : null, digits ? textBtn : null, l.email ? emailBtn : null,
+          h("button", { type: "button", class: "btn", onclick: () => prefill("Note") }, "Add a note")),
+        needsDnc ? h("div", { class: "panel", style: "background:var(--bone)" },
+          h("b", null, "Record your Do Not Call Registry check"),
+          h("p", { class: "hint" }, "Look up " + l.phone + " with your brokerage's DNC scrub or at telemarketing.donotcall.gov, then record what you found."),
+          h("div", { class: "actions" },
+            h("button", { type: "button", class: "btn", onclick: () => run("recordDnc", { id: l.id, onDnc: "No" }, "Recorded: not on the list") }, "Not on the list"),
+            h("button", { type: "button", class: "btn", onclick: () => run("recordDnc", { id: l.id, onDnc: "Yes" }, "Recorded: on the list") }, "On the list"))) : null,
+        h("details", null, h("summary", null, "Permissions and opt-outs"),
+          h("div", { style: "display:grid;gap:10px;margin-top:10px" }, consentInfo, consentForm(l, run),
+            h("div", { class: "actions" },
+              l.phoneOptOut !== "Yes" && digits ? h("button", { type: "button", class: "btn danger", onclick: () => { if (confirm("Block all calls and texts to " + l.name + "?")) run("optOut", { id: l.id, channel: "phone", how: "Asked to stop calls/texts" }, "Calls and texts blocked"); } }, "They asked to stop calls/texts") : null,
+              l.unsubscribed !== "Yes" && l.email ? h("button", { type: "button", class: "btn danger", onclick: () => { if (confirm("Unsubscribe " + l.name + " from email?")) run("optOut", { id: l.id, channel: "email", how: "Asked to stop emails" }, "Unsubscribed"); } }, "Unsubscribe from email") : null)))),
+      logBox,
+      h("section", { class: "panel" }, h("h3", null, "History"),
+        res.activities.length ? h("ul", { class: "timeline" }, res.activities.map(a => h("li", null,
+          h("div", { class: "t" }, fmtWhen(a.when) + " · " + a.type + (a.outcome ? " · " + a.outcome : "") + (a.by && a.by !== "You" ? " · " + a.by : "")),
+          a.details ? h("div", { class: "d" }, a.details) : null))) : h("p", { class: "hint" }, "Nothing yet.")),
+      details,
+      h("section", { class: "panel" }, h("h3", null, "Delete"),
+        h("p", { class: "hint" }, "Use this when someone asks you to delete their information. A do-not-contact record (email and phone only) is kept so they are not contacted again."),
+        h("div", { class: "actions" }, h("button", { type: "button", class: "btn danger", onclick: async () => {
+          if (!confirm("Permanently delete " + l.name + " and their history?")) return;
+          try { await call("deleteLead", { id: l.id, suppress: true }); S.data.leads = S.data.leads.filter(x => x.id !== l.id); toast("Deleted"); close(); } catch (e) { toast(e.message, true); }
+        } }, "Delete (privacy request)")))));
+}
+
+function consentForm(l, run) {
+  if ((l.emailConsent === "Yes" || !l.email) && (l.phoneConsent === "Yes" || !l.phone)) return null;
+  const em = h("input", { type: "checkbox" }), ph = h("input", { type: "checkbox" }), proof = h("input", { placeholder: "e.g. Signed open house sheet, 123 Main St, Oct 25" });
+  return h("div", { class: "panel", style: "background:var(--bone)" },
+    h("b", null, "Record permission they gave you in person"),
+    l.email && l.emailConsent !== "Yes" ? h("label", { class: "check" }, em, "They agreed to receive my emails") : null,
+    l.phone && l.phoneConsent !== "Yes" ? h("label", { class: "check" }, ph, "They signed written consent to calls and texts at " + l.phone) : null,
+    h("label", { class: "f" }, "Where and how (keep the signed paper)", proof),
+    h("div", { class: "actions" }, h("button", { type: "button", class: "btn", onclick: () => run("saveLead", { id: l.id, addEmailConsent: em.checked, addPhoneConsent: ph.checked, consentProof: proof.value }, "Permission recorded") }, "Save permission")));
+}
+
+// ---------- Composers ----------
+function fillTemplate(text, l) {
+  const s = S.data.settings, es = l.language === "es";
+  const goals = es ? { buy: "comprar una casa", sell: "vender tu casa", invest: "invertir en bienes raíces", rent: "rentar una casa", other: "bienes raíces" }
+    : { buy: "buying a home", sell: "selling your home", invest: "investing in real estate", rent: "renting a home", other: "real estate" };
+  const v = { firstName: String(l.name || "").trim().split(/\s+/)[0], name: l.name, agentName: s.agentName, agentPhone: s.phone, brokerage: s.brokerage,
+    area: l.area || (es ? "el valle de Las Vegas" : "the Las Vegas valley"), goalText: goals[l.goal] || goals.other };
+  return String(text || "").replace(/\{\{(\w+)\}\}/g, (m, k) => v[k] !== undefined ? v[k] : m);
+}
+function modal(title, ...content) {
+  const scrim = h("div", { class: "scrim center", onclick: e => { if (e.target === scrim) scrim.remove(); } });
+  const box = h("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-label": title }, h("h3", null, title), ...content);
+  scrim.append(box); document.body.append(scrim);
+  const esc = e => { if (e.key === "Escape") { scrim.remove(); document.removeEventListener("keydown", esc); } };
+  document.addEventListener("keydown", esc);
+  return scrim;
+}
+function pickTemplates(channel, l) {
+  const all = S.data.templates.filter(t => t.channel === channel && t.key !== "welcome");
+  const lang = l.language === "es" ? "es" : "en";
+  return [...new Set(all.map(t => t.key))].map(k => all.find(t => t.key === k && t.language === lang) || all.find(t => t.key === k));
+}
+function textComposer(l, after) {
+  const list = pickTemplates("text", l), body = h("textarea", { "aria-label": "Message", style: "min-height:140px" });
+  const choose = k => { const t = list.find(x => x.key === k); body.value = t ? fillTemplate(t.body, l) : ""; };
+  const sel = select("Template", list.map(t => [t.key, t.name]), list[0] && list[0].key, undefined, e => choose(e.target.value));
+  choose(list[0] && list[0].key);
+  const digits = String(l.phone).replace(/\D/g, "");
+  const m = modal("Text " + l.name, h("label", { class: "f" }, "Template", sel), h("label", { class: "f" }, "Message", body),
+    h("p", { class: "hint" }, "Opens your phone's messages app so you send it yourself, one person at a time. Keep \"Reply STOP to opt out\" in first messages."),
+    h("div", { class: "actions" }, h("a", { class: "btn dark", href: "#", onclick: e => { e.currentTarget.href = "sms:" + digits + "?&body=" + encodeURIComponent(body.value); setTimeout(() => { m.remove(); after(); }, 300); } }, "Open in Messages"),
+      h("button", { type: "button", class: "btn", onclick: () => navigator.clipboard.writeText(body.value).then(() => toast("Copied"), () => { body.select(); toast("Press copy on your keyboard"); }) }, "Copy text")));
+}
+function emailComposer(l, redraw) {
+  const list = pickTemplates("email", l), subject = h("input", { "aria-label": "Subject" }), body = h("textarea", { "aria-label": "Message", style: "min-height:220px" });
+  const note = h("p", { class: "hint" });
+  const choose = k => {
+    const t = list.find(x => x.key === k); subject.value = t ? fillTemplate(t.subject, l) : ""; body.value = t ? fillTemplate(t.body, l) : "";
+    const ok = t && (t.kind !== "marketing" || l.marketingCheck.ok);
+    note.textContent = !t ? "" : t.kind === "marketing" ? (ok ? "Marketing email: your address and an unsubscribe link are added at the bottom." : "Can't send marketing to this person: " + l.marketingCheck.reasons.join(" ")) : "Your name, brokerage and contact details are added at the bottom.";
+    sendBtn.disabled = !ok;
+  };
+  const sendBtn = h("button", { type: "button", class: "btn dark", onclick: async () => {
+    sendBtn.disabled = true; sendBtn.textContent = "Sending…";
+    try { const r = await call("sendEmail", { id: l.id, key: sel.value, subject: subject.value, body: body.value }); m.remove(); toast("Email sent to " + l.email); redraw(r); }
+    catch (e) { toast(e.message, true); sendBtn.disabled = false; sendBtn.textContent = "Send email"; }
+  } }, "Send email");
+  const sel = select("Template", list.map(t => [t.key, t.name + (t.kind === "marketing" ? " (marketing)" : "")]), list[0] && list[0].key, undefined, e => choose(e.target.value));
+  const m = modal("Email " + l.name + " <" + l.email + ">", h("label", { class: "f" }, "Template", sel), h("label", { class: "f" }, "Subject", subject), h("label", { class: "f" }, "Message", body), note,
+    h("div", { class: "actions" }, sendBtn, h("button", { type: "button", class: "btn", onclick: () => m.remove() }, "Cancel")));
+  choose(list[0] && list[0].key);
+}
+
+// ---------- Add lead ----------
+function addLead() {
+  const L = S.data.lists, F = {};
+  const inp = (k, label, attrs) => h("label", { class: "f" + (attrs && attrs.full ? " full" : "") }, label, F[k] = h("input", Object.assign({}, attrs, { full: null })));
+  F.source = select("Source", L.sources, "Open house"); F.goal = select("Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), "buy"); F.language = select("Language", [["en", "English"], ["es", "Español"]], "en");
+  F.inquired = h("input", { type: "checkbox", checked: true }); F.em = h("input", { type: "checkbox" }); F.ph = h("input", { type: "checkbox" }); F.hasAgent = h("input", { type: "checkbox" });
+  const err = h("p", { class: "status no", hidden: true });
+  const m = modal("Add a lead",
+    h("div", { class: "form" }, inp("name", "Name"), inp("phone", "Phone", { type: "tel" }), inp("email", "Email", { type: "email", full: true }),
+      h("label", { class: "f" }, "Source", F.source), h("label", { class: "f" }, "Goal", F.goal), h("label", { class: "f" }, "Language", F.language), inp("area", "Area"),
+      inp("referredBy", "Referred by"), inp("tags", "Tags"), h("label", { class: "f full" }, "Notes", F.notes = h("textarea", null))),
+    h("label", { class: "check" }, F.inquired, h("span", null, "They contacted me or asked me about real estate ", h("span", { class: "hint" }, "(lets you follow up for 3 months)"))),
+    h("label", { class: "check" }, F.hasAgent, "They already work with another agent"),
+    h("label", { class: "check" }, F.em, "They agreed to receive my emails"),
+    h("label", { class: "check" }, F.ph, h("span", null, "They signed written consent to calls and texts ", h("span", { class: "hint" }, "(only if they signed it)"))),
+    inp("proof", "If they gave permission: where and how", { full: true, placeholder: "e.g. Open house sign-in sheet, 123 Main St" }),
+    err,
+    h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: async () => {
+      const p = { inquired: F.inquired.checked, hasAgent: F.hasAgent.checked, addEmailConsent: F.em.checked, addPhoneConsent: F.ph.checked, consentProof: F.proof.value };
+      ["name", "phone", "email", "source", "goal", "language", "area", "referredBy", "tags", "notes"].forEach(k => p[k] = F[k].value);
+      try { const r = await call("saveLead", p); upsert(r.lead); m.remove(); toast("Lead added"); render(); openLead(r.lead.id); }
+      catch (e) { err.textContent = e.message; err.hidden = false; }
+    } }, "Add lead"), h("button", { type: "button", class: "btn", onclick: () => m.remove() }, "Cancel")));
+  F.name.focus();
+}
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { S.view = b.dataset.view; render(); }));
+$("#refresh").addEventListener("click", () => { $("#main").replaceChildren(h("div", { class: "loading" }, "Refreshing…")); load(); });
+$("#add").addEventListener("click", addLead);
+load();
+</script>
+</body>
+</html>

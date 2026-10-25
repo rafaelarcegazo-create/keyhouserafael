@@ -8,6 +8,7 @@ A one-page bilingual (English / Spanish) website. It is plain HTML with no paid 
 - `img/dh-capital-realty.png`: brokerage logo
 - `img/rafael-seated.jpg`: About section portrait
 - `media/*.mp4` and `*-poster.jpg`: the two short videos (muted, compressed for the web) and their still frames
+- `leads-config.js`: the link to your Lead CRM
 
 Upload the `media` folder too when hosting.
 
@@ -24,7 +25,14 @@ Other free options that work the same way: Netlify (drag the folder onto app.net
 A custom domain (for example a `.realtor` or `.com` address) is the only thing that costs money, usually paid yearly to a domain registrar. GitHub Pages can use it for free once you own it.
 
 ## How the contact form works
-The form opens the visitor's own email app with their message addressed to rafaelarcegazo@gmail.com. No paid form service is used. Phone and email are also shown on the page.
+Once the free Lead CRM is set up (see `crm/README.md`), every message from the form goes straight into your Google Sheet, you get an alert email, and the person gets a thank-you email. Paste your CRM link into `leads-config.js` to turn this on. Until then, the form opens the visitor's own email app with their message addressed to rafaelarcegazo@gmail.com.
+
+The form has two optional permission boxes (emails, and calls/texts) with the wording the law expects. What each person agreed to is saved in the CRM.
+
+## Other pages
+- `privacy.html`: privacy notice in English and Spanish, linked from the form and the footer.
+- `open-house.html`: sign-in sheet for open houses. Open it on a tablet as `open-house.html?property=123 Main St`.
+- `crm/`: the Lead CRM (lead capture, follow-up reminders, email campaigns, compliance checks). It runs in Google Sheets, not on the website.
 
 ## Editing text
 Each English text has a `data-i18n` key. Its Spanish version is in the `T.es` list near the bottom of `index.html` under the same key. Change both when editing.
