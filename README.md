@@ -38,3 +38,18 @@ Nevada advertising rules generally require the brokerage name to appear clearly.
 3. Click the schedule, then Share > Website embed (or copy the booking page link).
 4. In `index.html`, find `const BOOKING_URL = "";` and paste the link between the quotes.
 Visitors then see your live open times and book directly. Google sends the confirmation and reminder emails.
+
+## Listings
+- The "My listings" section in `index.html` has one card per home. Copy a `<article class="card listing">` block to add a home, and delete it (or change the tag to Pending / Sold) when it changes.
+- Each listing has its own page: `listings/sample-home/index.html` is the template. To add a home:
+  1. Copy the `listings/sample-home` folder and rename it after the street, e.g. `listings/1234-desert-rose-ave`.
+  2. Put the photos in that folder (e.g. `photos/01.jpg`) and, if you have one, the video.
+  3. Open its `index.html`, edit the `LISTING` block near the bottom (price, address, beds, baths, description in English and Spanish, photos, MLS number), and set `sample: false`.
+  4. Update the `<title>` and `og:` lines at the top so the link looks right when shared.
+  5. The page is then live at `keyhouserafael.realtor/listings/1234-desert-rose-ave/`.
+- Showing requests open the visitor's email app addressed to rafaelarcegazo@gmail.com (free, like the contact form).
+- Check with DH Capital Realty and the MLS rules before publishing listing photos and details.
+
+### Current listing
+- `listings/7942-firethorn-ln/`: 7942 Firethorn Ln, Las Vegas, NV 89123 · $539,999 · MLS# 2829947. Photos are in its `photos` folder. When it goes pending or sells, change `status` in its `LISTING` block and the tag on its card in `index.html`.
+- `listings/sample-home/` is the blank template (hidden from search engines).
