@@ -49,3 +49,7 @@ Visitors then see your live open times and book directly. Google sends the confi
   5. The page is then live at `keyhouserafael.realtor/listings/1234-desert-rose-ave/`.
 - Showing requests open the visitor's email app addressed to rafaelarcegazo@gmail.com (free, like the contact form).
 - Check with DH Capital Realty and the MLS rules before publishing listing photos and details.
+
+### Current listing
+- `listings/7942-firethorn-ln/`: 7942 Firethorn Ln, Las Vegas, NV 89123 · $539,999 · MLS# 2829947. Photos are in its `photos` folder. When it goes pending or sells, change `status` in its `LISTING` block and the tag on its card in `index.html`.
+- `listings/sample-home/` is the blank template (hidden from search engines).
