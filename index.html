@@ -125,6 +125,20 @@ a{color:inherit}
 section.block{padding-block:clamp(64px,8vw,112px)}
 .white{background:var(--white);border-block:1px solid var(--line)}
 
+/* Soft transitions: sections fade into each other through transparent neutral tones instead of hard edges. */
+:root{--fade:clamp(80px,10vw,160px)}
+.trust{border-top-color:transparent}
+.white{border-block:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0,var(--white) var(--fade),var(--white) calc(100% - var(--fade)),rgba(255,255,255,0) 100%)}
+#listings{background:linear-gradient(180deg,var(--white) 0,rgba(255,255,255,0) var(--fade))}
+.reviews{padding-block:calc(clamp(64px,8vw,112px) + var(--fade)*.6)!important;background:linear-gradient(180deg,var(--bone) 0,rgba(34,32,29,.35) calc(var(--fade)*.45),var(--ink) var(--fade),var(--ink) calc(100% - var(--fade)),rgba(34,32,29,.35) calc(100% - var(--fade)*.45),var(--bone) 100%)}
+#book{background:linear-gradient(180deg,rgba(233,228,220,0) 0,rgba(233,228,220,.55) 50%,rgba(233,228,220,0) 100%)}
+.site-foot{border-top:0;background:linear-gradient(180deg,rgba(233,228,220,0) 0,rgba(233,228,220,.6) 100%)}
+
+/* Gentle fade-in as each part scrolls into view (off for reduced motion or if scripts don't run) */
+.reveal-on .reveal{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal-on .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal-on .reveal{opacity:1;transform:none}}
+
 /* Listings */
 .listings{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .card{background:var(--white);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:grid}
@@ -763,6 +777,15 @@ const BOOKING_URL = "https://calendar.app.google/tFSv9YFwUPy5zq7NA";
   a.dataset.i18n = "bk.open"; a.textContent = "Open my calendar"; a.style.cssText = "display:inline-block;margin-top:22px";
   document.querySelector(".book > div").appendChild(a);
 })();
+
+// Soft fade-in for sections as they scroll into view.
+if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const els = document.querySelectorAll(".sec-head, .card, .area, .svc, .agent-photo, .agent-copy, .review, .faq-grid > div, .book > div, .contact-grid > *, .foot-cols > div");
+  els.forEach(el => el.classList.add("reveal"));
+  document.documentElement.classList.add("reveal-on");
+  const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px", threshold: .08 });
+  els.forEach((el, i) => { el.style.transitionDelay = (i % 3) * 90 + "ms"; io.observe(el); });
+}
 
 // Videos: muted loops; paused for reduced motion, with a visible toggle.
 const vids = [...document.querySelectorAll("video.vid")], vt = document.getElementById("vid-toggle");
