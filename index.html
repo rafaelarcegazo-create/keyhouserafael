@@ -125,6 +125,26 @@ a{color:inherit}
 section.block{padding-block:clamp(64px,8vw,112px)}
 .white{background:var(--white);border-block:1px solid var(--line)}
 
+/* Layered pages: each section is a frosted, see-through sheet that slides up over the one before it.
+   Colors stay neutral (white, bone, sand, charcoal) with transparency so the page underneath shows softly. */
+:root{--overlap:clamp(28px,4vw,48px);--radius:clamp(22px,3vw,36px);--fade-top:clamp(160px,22vw,280px)}
+body{background:radial-gradient(1200px 800px at 85% 10%,rgba(176,141,91,.10),transparent 60%),radial-gradient(1000px 700px at 10% 60%,rgba(139,133,124,.12),transparent 60%),var(--bone);background-attachment:fixed}
+.trust{border-top-color:transparent;padding-bottom:var(--overlap)}
+section.block{position:relative;margin-top:calc(var(--overlap)*-1);padding-top:calc(clamp(64px,8vw,112px) + var(--overlap)*.4);border-radius:var(--radius) var(--radius) 0 0;
+  --c:246,244,240;--a:.82;background:linear-gradient(180deg,rgba(var(--c),.28) 0,rgba(var(--c),.5) calc(var(--fade-top)*.45),rgba(var(--c),var(--a)) var(--fade-top));-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);
+  box-shadow:0 -1px 0 rgba(255,255,255,.7) inset,0 -18px 50px rgba(34,32,29,.07)}
+section.block.white{border-block:0;--c:255,255,255;--a:.80}
+#services,#book{--c:233,228,220;--a:.78}
+section.block.reviews{--c:34,32,29;--a:.93;box-shadow:0 -1px 0 rgba(255,255,255,.08) inset,0 -18px 50px rgba(34,32,29,.18)}
+section.block > .wrap{transform-origin:50% 0;will-change:transform,opacity}
+.site-foot{position:relative;z-index:20;border-top:0;background:rgba(246,244,240,.9);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+@media (prefers-reduced-motion:reduce){section.block > .wrap{transform:none!important;opacity:1!important}}
+
+/* Gentle fade-in as each part scrolls into view (off for reduced motion or if scripts don't run) */
+.reveal-on .reveal{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal-on .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal-on .reveal{opacity:1;transform:none}}
+
 /* Listings */
 .listings{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .card{background:var(--white);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:grid}
@@ -137,8 +157,20 @@ section.block{padding-block:clamp(64px,8vw,112px)}
 .card .body{padding:18px 20px 20px;display:grid;gap:6px}
 .card .price{font-family:var(--serif);font-size:24px;line-height:1.2}
 .card .addr{color:var(--ink-2)}
-.card .specs{display:flex;gap:16px;font-size:14px;color:var(--stone);border-top:1px solid var(--line);padding-top:12px;margin-top:6px}
-@media (max-width:900px){.listings{grid-template-columns:1fr 1fr}}
+.card .specs{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;color:var(--stone);border-top:1px solid var(--line);padding-top:12px;margin-top:6px}
+.card-link{display:grid;text-decoration:none;color:inherit;height:100%;grid-template-rows:auto 1fr}
+.card .more{font-weight:600;font-size:15px;margin-top:8px;text-decoration:none;justify-self:start;border-bottom:1px solid var(--ink);padding-bottom:2px}
+.card-link:hover .more,.card .more:hover{color:var(--bronze);border-color:var(--bronze)}
+.card-link:hover .ph img{transform:scale(1.03)}
+.tag-sale{display:inline-flex;align-items:center;gap:7px}
+.tag-sale::before{content:"";width:8px;height:8px;border-radius:50%;background:#4f8a5b}
+.tag-sample{left:auto;right:14px;background:var(--ink);color:#fff}
+.cta-card{background:var(--sand);border-color:transparent}
+.cta-card .body{align-content:center;gap:14px;padding:32px 28px}
+.cta-card .price{font-size:30px}
+.cta-card .btn{justify-self:start;margin-bottom:10px}
+.cta-card .link{justify-self:start}
+@media (max-width:900px){.listings{grid-template-columns:1fr 1fr}.cta-card{grid-column:1/-1}}
 @media (max-width:620px){.listings{grid-template-columns:1fr}.card .ph{aspect-ratio:4/3}.card .ph.tall{aspect-ratio:4/5}}
 
 /* Areas */
@@ -369,13 +401,13 @@ fieldset .legend{width:100%}
   <section class="block" id="listings">
     <div class="wrap">
       <div class="sec-head">
-        <div><h2 class="h2" data-i18n="lst.h">Featured homes</h2><p class="lede" data-i18n="lst.p">A look inside homes I show. New listings will appear here as they come on the market.</p></div>
-        <a class="link" href="#contact" data-goal="buy" data-i18n="lst.cta">Get new listings by email</a>
+        <div><h2 class="h2" data-i18n="lst.h">My listings</h2><p class="lede" data-i18n="lst.p">Homes I have for sale right now. Each one has its own page with photos, a video tour and a showing request.</p></div>
       </div>
+      <!-- LISTINGS: copy one <article class="card listing"> per home. Each links to its own page in listings/<folder>/. -->
       <div class="listings">
-        <article class="card"><div class="ph"><span class="tag" data-i18n="lst.photo">Photo</span><img src="img/home-dining.jpg" alt="Dining room with a wood table, cream chairs and arched mirrors" width="1400" height="1050" loading="lazy"></div><div class="body"><span class="price" data-i18n="lst.c1">Bright dining room</span><span class="addr" data-i18n="lst.c1d">Open to the patio and backyard.</span></div></article>
-        <article class="card"><div class="ph tall"><span class="tag" data-i18n="lst.video">Video tour</span><video class="vid" src="media/rafael-stairs-tour.mp4" poster="media/rafael-stairs-tour-poster.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Rafael walking down the stairs of a two-story home"></video></div><div class="body"><span class="price" data-i18n="lst.c2">Two-story walkthrough</span><span class="addr" data-i18n="lst.c2d">From the loft down to the living room.</span></div></article>
-        <article class="card"><div class="ph"><span class="tag" data-i18n="lst.photo">Photo</span><img src="img/home-kitchen.jpg" alt="Open kitchen with a large island, pendant lights and stainless appliances" width="1400" height="1050" loading="lazy"></div><div class="body"><span class="price" data-i18n="lst.c3">Open kitchen</span><span class="addr" data-i18n="lst.c3d">Large island with seating for three.</span></div></article>
+        <article class="card listing"><a class="card-link" href="listings/7942-firethorn-ln/"><div class="ph"><span class="tag tag-sale" data-i18n="lst.sale">For sale</span><img src="listings/7942-firethorn-ln/photos/02.jpg" alt="Single-story home at 7942 Firethorn Ln with a circular driveway and mature trees" width="1179" height="724" loading="lazy"></div><div class="body"><span class="price">$539,999</span><span class="addr">7942 Firethorn Ln, Las Vegas, NV 89123</span><span class="specs"><span>5 <span data-i18n="lst.bd">bd</span></span><span>4 <span data-i18n="lst.ba">ba</span></span><span>1,897 <span data-i18n="lst.sf">sq ft</span></span><span data-i18n="lst.half">½ acre lot</span></span><span class="more" data-i18n="lst.view">View home</span></div></a></article>
+        <article class="card"><div class="ph"><span class="tag" data-i18n="lst.soon">Coming soon</span><video class="vid" src="media/rafael-stairs-tour.mp4" poster="media/rafael-stairs-tour-poster.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Rafael walking down the stairs of a two-story home"></video></div><div class="body"><span class="price" data-i18n="lst.c2">New listings on the way</span><span class="addr" data-i18n="lst.c2d">Get them by email before they show up online.</span><a class="more" href="#contact" data-goal="buy" data-i18n="lst.cta">Get new listings by email</a></div></article>
+        <article class="card cta-card"><div class="body"><span class="price" data-i18n="lst.c3">Looking for something else?</span><span class="addr" data-i18n="lst.c3d">I can show you any home for sale on the Las Vegas MLS, not only mine. Tell me what you want and I'll send you matches.</span><a class="btn btn-dark" href="#contact" data-goal="buy" data-i18n="lst.c3b">Send me homes</a><span class="muted" data-i18n="lst.c3s">Selling? Your home could be the next one here.</span><a class="link" href="#contact" data-goal="sell" data-i18n="lst.c3l">List my home with Rafael</a></div></article>
       </div>
     </div>
   </section>
@@ -601,7 +633,7 @@ const T = {
     "s.where":"Dónde","s.whereph":"Ciudad, vecindario o código postal","s.price":"Precio","s.any":"Cualquier precio","s.go":"Buscar casas",
     "s.note":"Dime qué buscas y te envío casas que coincidan, incluso las que aún no están en internet.",
     "tr.reviews":"Reseñas de clientes en Google","tr.lang":"English spoken too","tr.lic":"Licencia de bienes raíces de Nevada","tr.broker":"Corretaje",
-    "lst.h":"Casas destacadas","lst.p":"Un vistazo dentro de las casas que muestro. Aquí aparecerán nuevas propiedades a medida que salgan al mercado.","lst.photo":"Foto","lst.video":"Video","lst.c1":"Comedor luminoso","lst.c1d":"Abierto al patio y al jardín.","lst.c2":"Recorrido de dos pisos","lst.c2d":"Del loft a la sala.","lst.c3":"Cocina abierta","lst.c3d":"Isla grande con lugar para tres.","lst.cta":"Recibir nuevas propiedades por correo",
+    "lst.h":"Mis propiedades","lst.p":"Casas que tengo a la venta ahora. Cada una tiene su propia página con fotos, video y solicitud de visita.","lst.sale":"En venta","lst.half":"Terreno de ½ acre","lst.bd":"rec","lst.ba":"baños","lst.sf":"pies²","lst.view":"Ver la casa","lst.soon":"Próximamente","lst.c2":"Nuevas propiedades en camino","lst.c2d":"Recíbelas por correo antes de que salgan en internet.","lst.c3":"¿Buscas otra cosa?","lst.c3d":"Te puedo mostrar cualquier casa a la venta en el MLS de Las Vegas, no solo las mías. Dime qué buscas y te envío opciones.","lst.c3b":"Envíame casas","lst.c3s":"¿Vendes? Tu casa puede ser la próxima aquí.","lst.c3l":"Vender mi casa con Rafael","lst.cta":"Recibir nuevas propiedades por correo",
     "lst.tag":"Próximamente","lst.price":"Precio a consultar","lst.beds":"Recámaras","lst.baths":"Baños","lst.sqft":"Pies²",
     "areas.h":"Explora el valle","areas.p":"Elige una zona y te envío lo que está a la venta ahí ahora mismo.","ar.go":"Ver casas aquí",
     "ar.lv":"La ciudad misma, del centro al noroeste.","ar.hd":"Ciudad vecina en el sureste del valle.",
@@ -789,6 +821,38 @@ const BOOKING_URL = "https://calendar.app.google/tFSv9YFwUPy5zq7NA";
   a.dataset.i18n = "bk.open"; a.textContent = "Open my calendar"; a.style.cssText = "display:inline-block;margin-top:22px";
   document.querySelector(".book > div").appendChild(a);
 })();
+
+// Layered pages: as you scroll past a section, its content eases back and dims while the next sheet slides over it.
+(function(){
+  const sheets = [...document.querySelectorAll("section.block")];
+  sheets.forEach((el, i) => el.style.zIndex = i + 1);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let ticking = false;
+  function update(){
+    ticking = false;
+    const vh = innerHeight;
+    sheets.forEach((el, i) => {
+      const next = sheets[i + 1], inner = el.firstElementChild;
+      if (!next || !inner) return;
+      const nt = next.getBoundingClientRect().top;
+      const p = Math.min(Math.max((vh - nt) / vh, 0), 1);      // 0 = next sheet not in view, 1 = it fills the screen
+      inner.style.transform = p ? `translateY(${(p * vh * .28).toFixed(1)}px) scale(${(1 - p * .04).toFixed(4)})` : "";
+      inner.style.opacity = p ? (1 - p * .55).toFixed(3) : "";
+    });
+  }
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  addEventListener("resize", update);
+  update();
+})();
+
+// Soft fade-in for sections as they scroll into view.
+if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const els = document.querySelectorAll(".sec-head, .card, .area, .svc, .agent-photo, .agent-copy, .review, .faq-grid > div, .book > div, .contact-grid > *, .foot-cols > div");
+  els.forEach(el => el.classList.add("reveal"));
+  document.documentElement.classList.add("reveal-on");
+  const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px", threshold: .08 });
+  els.forEach((el, i) => { el.style.transitionDelay = (i % 3) * 90 + "ms"; io.observe(el); });
+}
 
 // Videos: muted loops; paused for reduced motion, with a visible toggle.
 const vids = [...document.querySelectorAll("video.vid")], vt = document.getElementById("vid-toggle");
