@@ -74,7 +74,7 @@ function load(opts = {}) {
   };
   vm.createContext(ctx);
   const dir = path.join(__dirname, "..");
-  ["Config.gs", "Rules.gs", "Code.gs"].forEach(f => vm.runInContext(fs.readFileSync(path.join(dir, f), "utf8"), ctx, { filename: f }));
+  (process.env.LEADCRM_BUNDLE ? ["LeadCRM.gs"] : ["Config.gs", "Rules.gs", "Code.gs"]).forEach(f => vm.runInContext(fs.readFileSync(path.join(dir, f), "utf8"), ctx, { filename: f }));
   // Each Apps Script request starts with a fresh in-memory cache, like a real execution.
   const fresh = fn => (...a) => { vm.runInContext("CACHE = {}", ctx); return fn(...a); };
   return {

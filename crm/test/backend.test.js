@@ -262,7 +262,8 @@ test("the dashboard is private", () => {
   g.user.active = "stranger@example.com";
   assert.throws(() => g.api("bootstrap"), /do not have access/);
   g.user.active = "owner@example.com";
-  assert.strictEqual(g.get({}).file, "Dashboard");
+  const page = g.get({});
+  assert.ok(page.file === "Dashboard" || /<title>Lead CRM<\/title>/.test(page.html));
   assert.ok(Array.isArray(g.api("bootstrap").leads));
 });
 
@@ -335,4 +336,11 @@ test("without a dialog, the sheet shows a reminder instead", () => {
   sh.rows[1][stageCol - 1] = "Closed";
   g.edit({ range: sh.getRange(2, stageCol), value: "Closed" });
   assert.match(g.toasts[0], /Year closed/);
+});
+
+test("the one-file LeadCRM.gs is up to date with the source files", () => {
+  const fs = require("fs"), path = require("path"), file = path.join(__dirname, "..", "LeadCRM.gs");
+  const before = fs.readFileSync(file, "utf8");
+  require("child_process").execFileSync(process.execPath, [path.join(__dirname, "..", "build.js")]);
+  assert.strictEqual(fs.readFileSync(file, "utf8"), before, "run: node crm/build.js");
 });

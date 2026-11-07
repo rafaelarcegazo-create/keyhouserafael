@@ -39,12 +39,7 @@ A free system to capture every lead, follow up with every person on time, and st
 ## Set it up (about 20 minutes, one time)
 
 1. **Make the sheet.** Go to [sheets.new](https://sheets.new) while signed in as rafaelarcegazo@gmail.com. Name it "Lead CRM".
-2. **Add the code.** In the sheet, open **Extensions > Apps Script**.
-   - Click `Code.gs`, delete what is there, and paste the contents of `crm/Code.gs`.
-   - Click **+ > Script**, name it `Config`, and paste `crm/Config.gs`. Do the same for `Rules` with `crm/Rules.gs`.
-   - Click **+ > HTML**, name it `Dashboard`, and paste `crm/Dashboard.html`.
-   - Click the gear (**Project Settings**), turn on **Show "appsscript.json" manifest file**, go back to the editor, open `appsscript.json` and replace it with `crm/appsscript.json`.
-   - Click **Save**.
+2. **Add the code.** In the sheet, open **Extensions > Apps Script**. Click `Code.gs`, delete everything in it, paste the whole contents of `crm/LeadCRM.gs`, and click **Save**. That one file is the entire CRM, dashboard included.
 3. **Run setup.** At the top of the editor, pick `setup` in the function list and click **Run**. Google asks for permission. Because this is your own script, it shows "Google hasn't verified this app": click **Advanced**, then **Go to Lead CRM**, then **Allow**. The sheet now has its tabs.
 4. **Turn on lead capture.** Click **Deploy > New deployment**, choose type **Web app**, set **Execute as: Me** and **Who has access: Anyone**, and click **Deploy**. Copy the **Web app URL** (it ends in `/exec`).
    - Paste it in the sheet's **Settings** tab, in the `webAppUrl` row.
@@ -56,7 +51,7 @@ Open the dashboard any time from the sheet: **Lead CRM > Open dashboard** (reloa
 
 **On your phone:** open the Web app URL while signed in to your Google account. If it says "This page is private", Google did not share who you are with the page. In that case, use the Google Sheets app on your phone together with the 7am email.
 
-**If you change the code later:** **Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy**. The link stays the same.
+**To update to a newer version:** replace the contents of `Code.gs` with the new `crm/LeadCRM.gs`, click **Save**, run `setup` once, then **Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy**. The link stays the same.
 
 ## The tabs in your sheet
 
@@ -101,6 +96,8 @@ The system blocks or warns you before you break these rules. It is a practical g
 **Third-party leads** (Zillow, Realtor.com and similar) come with their own terms. Add them with the right source so you can see what they cost you in results.
 
 ## Test the code (for developers)
+
+`crm/LeadCRM.gs` is generated from `Config.gs`, `Rules.gs`, `Code.gs` and `Dashboard.html`. After changing any of them, run `node crm/build.js`.
 
 ```
 node --test crm/test/backend.test.js
