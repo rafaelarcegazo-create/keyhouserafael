@@ -13,6 +13,7 @@
   --sans:"Figtree","Helvetica Neue",Arial,system-ui,sans-serif;color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bone);color:var(--ink);font:15px/1.5 var(--sans)}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{margin:0;font-weight:600}
@@ -194,13 +195,35 @@ function todayGroups() {
     soon: rest.filter(l => dayKey(l.nextFollowUp) > t && dayKey(l.nextFollowUp) <= week).sort(by)
   };
 }
+// "Year closed" (2022 to this year) plus an optional exact closing date. Picking a date sets the year to match.
+function closedFields(year, dateIso) {
+  const yearSel = select("Year closed", S.data.lists.closedYears.map(String), year ? String(year) : "", "—");
+  const date = h("input", { type: "date", value: toInputDate(dateIso), min: S.data.lists.closedYears.at(-1) + "-01-01", max: todayKey(), "aria-label": "Exact closing date" });
+  yearSel.addEventListener("change", () => { if (date.value && date.value.slice(0, 4) !== yearSel.value) date.value = ""; });
+  date.addEventListener("change", () => { if (date.value) yearSel.value = date.value.slice(0, 4); });
+  return {
+    yearSel, date,
+    fields: [h("label", { class: "f" }, "Year closed", yearSel), h("label", { class: "f" }, "Exact closing date (optional)", date)],
+    values: () => ({ closedYear: yearSel.value, closedOn: fromInputDate(date.value) })
+  };
+}
+function askClosedYear(l, onSave, onCancel) {
+  const c = closedFields(l.closedYear || new Date().getFullYear(), l.closedOn);
+  const m = modal("Mark " + l.name + " as closed",
+    h("p", { class: "hint" }, "What year did this deal close? Add the exact date too if you have it, so you get a reminder on their home anniversary."),
+    h("div", { class: "form" }, c.fields),
+    h("div", { class: "actions" },
+      h("button", { type: "button", class: "btn dark", onclick: () => { if (!c.yearSel.value) return toast("Pick the year it closed", true); m.remove(); onSave(c.values()); } }, "Save"),
+      h("button", { type: "button", class: "btn", onclick: () => { m.remove(); onCancel(); } }, "Cancel")));
+}
+
 function leadCard(l, mode) {
   const due = mode === "fresh" ? { text: "Came in " + ago(l.created), cls: "now" } : dueLabel(l.nextFollowUp);
   const temp = l.temperature ? h("span", { class: "pill " + String(l.temperature).toLowerCase() }, l.temperature) : null;
   return h("button", { type: "button", class: "card", onclick: () => openLead(l.id) },
     h("div", null, h("b", null, l.name || "(no name)"), " ", temp),
     h("div", { class: "when " + due.cls }, due.text),
-    h("div", { class: "meta" }, [GOAL_LABEL[l.goal] || "", l.area, l.source, l.stage, l.language === "es" ? "Español" : ""].filter(Boolean).join(" · ")));
+    h("div", { class: "meta" }, [GOAL_LABEL[l.goal] || "", l.area, l.source, l.stage === "Closed" && l.closedYear ? "Closed " + l.closedYear : l.stage, l.language === "es" ? "Español" : ""].filter(Boolean).join(" · ")));
 }
 
 // ---------- Views ----------
@@ -272,7 +295,7 @@ function viewPipeline() {
 function viewCampaigns() {
   const L = S.data.lists, emailT = S.data.templates.filter(t => t.channel === "email" && t.key !== "welcome");
   const keys = [...new Map(emailT.map(t => [t.key, t])).values()];
-  const st = { key: keys[0] ? keys[0].key : "", filter: { stage: "", goal: "", language: "", source: "", tag: "" } };
+  const st = { key: keys[0] ? keys[0].key : "", filter: { stage: "", goal: "", language: "", source: "", closedYear: "", tag: "" } };
   const out = h("div", { class: "panel" }, h("p", { class: "hint" }, "Pick a template and a group, then preview who will get it."));
   const preview = async () => {
     out.replaceChildren(h("p", { class: "hint" }, "Checking permissions…"));
@@ -312,6 +335,7 @@ function viewCampaigns() {
         h("label", { class: "f" }, "Goal", select("Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), "", "Any", set("goal"))),
         h("label", { class: "f" }, "Language", select("Language", [["en", "English"], ["es", "Español"]], "", "Any", set("language"))),
         h("label", { class: "f" }, "Source", select("Source", L.sources, "", "Any", set("source"))),
+        h("label", { class: "f" }, "Year closed", select("Year closed", L.closedYears.map(String), "", "Any", set("closedYear"))),
         h("label", { class: "f full" }, "Tag (optional)", h("input", { placeholder: "e.g. summerlin-buyers", oninput: set("tag") }))),
       h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: preview }, "Preview who gets it")),
       h("details", null, h("summary", null, "See the template"), tplPreview),
@@ -429,6 +453,7 @@ function drawLead(drawer, res, close) {
   const F = {};
   const inp = (k, label, attrs) => h("label", { class: "f" + (attrs && attrs.full ? " full" : "") }, label, F[k] = h("input", Object.assign({ value: l[k] || "" }, attrs, { full: null })));
   const sel = (k, label, opts, blank) => h("label", { class: "f" }, label, F[k] = select(label, opts, l[k] || "", blank));
+  const closed = closedFields(l.closedYear, l.closedOn);
   const details = h("section", { class: "panel" }, h("h3", null, "Details"),
     h("div", { class: "form" },
       inp("name", "Name"), inp("phone", "Phone", { type: "tel" }), inp("email", "Email", { type: "email", full: true }),
@@ -436,19 +461,23 @@ function drawLead(drawer, res, close) {
       inp("area", "Area / neighborhood"), inp("price", "Price range"), inp("timeline", "Timeline", { placeholder: "e.g. 3–6 months" }),
       sel("source", "Source", [...new Set([...L.sources, l.source].filter(Boolean))], "—"),
       sel("temperature", "Temperature", ["Hot", "Warm", "Cold"], "—"), inp("referredBy", "Referred by"),
-      h("label", { class: "f" }, "Closing date", F.closedOn = h("input", { type: "date", value: toInputDate(l.closedOn) })),
+      closed.fields,
       h("label", { class: "f" }, "Next follow-up", F.nextFollowUp = h("input", { type: "date", value: toInputDate(l.nextFollowUp) })),
       inp("tags", "Tags (comma separated)", { full: true, placeholder: "e.g. first-time buyer, summerlin" }),
       h("label", { class: "f full" }, "Notes", F.notes = h("textarea", { value: l.notes || "" }), h("span", { class: "hint" }, "Fair housing: note what they want in a home, never personal traits like family, religion, origin or disability.")),
       h("label", { class: "check full" }, F.hasAgent = h("input", { type: "checkbox", checked: l.hasAgent === "Yes" }), "They already work with another agent")),
     h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: () => {
-      const p = { id: l.id, closedOn: fromInputDate(F.closedOn.value), nextFollowUp: fromInputDate(F.nextFollowUp.value), hasAgent: F.hasAgent.checked };
+      const p = { id: l.id, ...closed.values(), nextFollowUp: fromInputDate(F.nextFollowUp.value), hasAgent: F.hasAgent.checked };
       ["name", "phone", "email", "language", "goal", "area", "price", "timeline", "source", "temperature", "referredBy", "tags", "notes"].forEach(k => p[k] = F[k].value);
       if (p.phone.replace(/\D/g, "") !== digits && l.phoneConsent === "Yes" && !confirm("Changing the phone number removes the call/text permission, because consent belongs to the old number. Continue?")) return;
       run("saveLead", p, "Saved");
     } }, "Save details")));
 
-  const stageSel = select("Stage", L.stages, l.stage, undefined, e => run("saveLead", { id: l.id, stage: e.target.value }, "Stage changed to " + e.target.value));
+  const stageSel = select("Stage", L.stages, l.stage, undefined, e => {
+    const stage = e.target.value;
+    if (stage !== "Closed") return run("saveLead", { id: l.id, stage }, "Stage changed to " + stage);
+    askClosedYear(l, v => run("saveLead", { id: l.id, stage, ...v }, "Marked closed in " + v.closedYear), () => { e.target.value = l.stage; });
+  });
 
   const consentInfo = h("ul", { class: "hint", style: "margin:0;padding-left:18px" },
     h("li", null, "Email permission: " + (l.emailConsent === "Yes" ? "yes, " + fmtDate(l.emailConsentAt) : "no") + (l.unsubscribed === "Yes" ? " (unsubscribed)" : "")),
@@ -559,12 +588,19 @@ function addLead() {
   const L = S.data.lists, F = {};
   const inp = (k, label, attrs) => h("label", { class: "f" + (attrs && attrs.full ? " full" : "") }, label, F[k] = h("input", Object.assign({}, attrs, { full: null })));
   F.source = select("Source", L.sources, "Open house"); F.goal = select("Goal", L.goals.map(g => [g, GOAL_LABEL[g]]), "buy"); F.language = select("Language", [["en", "English"], ["es", "Español"]], "en");
+  F.stage = select("Stage", L.stages, "New");
+  const closed = closedFields(new Date().getFullYear(), "");
+  const closedBox = h("div", { class: "form full", hidden: true }, closed.fields);
+  F.stage.addEventListener("change", () => {
+    closedBox.hidden = F.stage.value !== "Closed";
+    if (F.stage.value === "Closed") F.inquired.checked = false; // A past client did not just ask about real estate.
+  });
   F.inquired = h("input", { type: "checkbox", checked: true }); F.em = h("input", { type: "checkbox" }); F.ph = h("input", { type: "checkbox" }); F.hasAgent = h("input", { type: "checkbox" });
   const err = h("p", { class: "status no", hidden: true });
   const m = modal("Add a lead",
     h("div", { class: "form" }, inp("name", "Name"), inp("phone", "Phone", { type: "tel" }), inp("email", "Email", { type: "email", full: true }),
-      h("label", { class: "f" }, "Source", F.source), h("label", { class: "f" }, "Goal", F.goal), h("label", { class: "f" }, "Language", F.language), inp("area", "Area"),
-      inp("referredBy", "Referred by"), inp("tags", "Tags"), h("label", { class: "f full" }, "Notes", F.notes = h("textarea", null))),
+      h("label", { class: "f" }, "Stage", F.stage), h("label", { class: "f" }, "Source", F.source), h("label", { class: "f" }, "Goal", F.goal), h("label", { class: "f" }, "Language", F.language), inp("area", "Area"),
+      inp("referredBy", "Referred by"), closedBox, inp("tags", "Tags"), h("label", { class: "f full" }, "Notes", F.notes = h("textarea", null))),
     h("label", { class: "check" }, F.inquired, h("span", null, "They contacted me or asked me about real estate ", h("span", { class: "hint" }, "(lets you follow up for 3 months)"))),
     h("label", { class: "check" }, F.hasAgent, "They already work with another agent"),
     h("label", { class: "check" }, F.em, "They agreed to receive my emails"),
@@ -573,7 +609,8 @@ function addLead() {
     err,
     h("div", { class: "actions" }, h("button", { type: "button", class: "btn dark", onclick: async () => {
       const p = { inquired: F.inquired.checked, hasAgent: F.hasAgent.checked, addEmailConsent: F.em.checked, addPhoneConsent: F.ph.checked, consentProof: F.proof.value };
-      ["name", "phone", "email", "source", "goal", "language", "area", "referredBy", "tags", "notes"].forEach(k => p[k] = F[k].value);
+      ["name", "phone", "email", "stage", "source", "goal", "language", "area", "referredBy", "tags", "notes"].forEach(k => p[k] = F[k].value);
+      if (p.stage === "Closed") { if (!closed.yearSel.value) { err.textContent = "Pick the year it closed."; err.hidden = false; return; } Object.assign(p, closed.values()); }
       try { const r = await call("saveLead", p); upsert(r.lead); m.remove(); toast("Lead added"); render(); openLead(r.lead.id); }
       catch (e) { err.textContent = e.message; err.hidden = false; }
     } }, "Add lead"), h("button", { type: "button", class: "btn", onclick: () => m.remove() }, "Cancel")));

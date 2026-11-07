@@ -414,6 +414,12 @@ function leadView_(l, now) {
   return o;
 }
 
+function closedYears_(now) {
+  var years = [];
+  for (var y = now.getFullYear(); y >= FIRST_CLOSED_YEAR; y--) years.push(y);
+  return years;
+}
+
 function setupWarnings_() {
   var s = settings_(), w = [];
   if (!s.postalAddress) w.push('Add your postal address on the Settings tab. The law requires it in every marketing email, so campaigns are off until it is filled in.');
@@ -430,7 +436,7 @@ var API = {
       leads: leads_().map(function (l) { return leadView_(l, now); }),
       templates: templates_().map(function (t) { return { key: t.key, channel: t.channel, kind: t.kind, language: t.language, name: t.name, subject: t.subject, body: t.body }; }),
       settings: { agentName: s.agentName, brokerage: s.brokerage, phone: s.phone, timeZone: s.timeZone, quietStart: s.quietStart, quietEnd: s.quietEnd },
-      lists: { stages: STAGES, goals: GOALS, sources: SOURCES, types: ACTIVITY_TYPES, outcomes: OUTCOMES },
+      lists: { closedYears: closedYears_(now), stages: STAGES, goals: GOALS, sources: SOURCES, types: ACTIVITY_TYPES, outcomes: OUTCOMES },
       quota: MailApp.getRemainingDailyQuota(),
       warnings: setupWarnings_(),
       sheetUrl: ss_().getUrl()
@@ -471,10 +477,18 @@ var API = {
     ['language', 'goal', 'area', 'price', 'timeline', 'source', 'temperature', 'tags', 'referredBy'].forEach(function (k) { if (p[k] !== undefined) lead[k] = clip_(p[k], 120); });
     if (p.notes !== undefined) lead.notes = clip_(p.notes, 5000);
     if (p.hasAgent !== undefined) lead.hasAgent = p.hasAgent ? 'Yes' : '';
+    if (p.closedYear !== undefined) {
+      var year = Number(p.closedYear) || '';
+      if (year && (year < FIRST_CLOSED_YEAR || year > now.getFullYear())) throw new Error('Pick a year from ' + FIRST_CLOSED_YEAR + ' to ' + now.getFullYear() + '.');
+      lead.closedYear = year;
+      // A date from a different year no longer matches what you picked.
+      if (toDate_(lead.closedOn) && toDate_(lead.closedOn).getFullYear() !== year) lead.closedOn = '';
+    }
     if (p.closedOn !== undefined) lead.closedOn = toDate_(p.closedOn) || '';
+    if (toDate_(lead.closedOn)) lead.closedYear = toDate_(lead.closedOn).getFullYear();
     if (p.stage && STAGES.indexOf(p.stage) >= 0 && p.stage !== lead.stage) {
       lead.stage = p.stage;
-      if (p.stage === 'Closed' && !toDate_(lead.closedOn)) lead.closedOn = now;
+      if (p.stage === 'Closed' && !toDate_(lead.closedOn) && !lead.closedYear) { lead.closedOn = now; lead.closedYear = now.getFullYear(); }
       if (!p.nextFollowUp) lead.nextFollowUp = suggestNextFollowUp(lead, now) || '';
     }
     if (p.nextFollowUp !== undefined && p.nextFollowUp !== '') lead.nextFollowUp = toDate_(p.nextFollowUp) || lead.nextFollowUp;
@@ -493,7 +507,7 @@ var API = {
     }
     saveLead_(lead);
     if (isNew) appendRow_('Activities', ACTIVITY_FIELDS, { id: newId_('A'), leadId: lead.id, when: now, type: 'New lead', outcome: lead.source || 'Added by hand', details: '', by: 'You' });
-    return { lead: leadView_(lead, now) };
+    return API.getLead({ id: lead.id }); // The lead panel redraws from this, history included.
   },
 
   logActivity: function (p) {
@@ -551,6 +565,7 @@ function campaign_(p, send) {
     if (f.goal && l.goal !== f.goal) return;
     if (f.language && (l.language || 'en') !== f.language) return;
     if (f.source && l.source !== f.source) return;
+    if (f.closedYear && String(l.closedYear) !== String(f.closedYear)) return;
     if (f.tag && String(l.tags).toLowerCase().split(/\s*,\s*/).indexOf(String(f.tag).toLowerCase()) < 0) return;
     var c = emailCheck(l, t.kind === 'marketing' ? 'marketing' : 'personal', now);
     if (c.ok) eligible.push(l);

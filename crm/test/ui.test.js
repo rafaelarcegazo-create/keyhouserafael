@@ -126,6 +126,23 @@ test("dashboard: today list, lead drawer, logging a call, compliance blocks, cam
   assert.strictEqual(await page.getAttribute(".drawer a:has-text('Call')", "aria-disabled"), "true");
   await page.click(".drawer header button[aria-label=Close]");
 
+  await page.click("button.card:has-text('Ben Carter')");
+  await page.selectOption(".drawer header select", "Closed");
+  await page.waitForSelector("text=What year did this deal close?");
+  const years = await page.$$eval(".modal select[aria-label='Year closed'] option", o => o.map(x => x.value).filter(Boolean));
+  assert.strictEqual(years.at(-1), "2022");
+  assert.strictEqual(years[0], String(new Date().getFullYear()));
+  await page.selectOption(".modal select[aria-label='Year closed']", "2023");
+  if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "dashboard-closed-year.png") });
+  await page.click(".modal button:has-text('Save')");
+  await page.waitForSelector(".toast:has-text('Marked closed in 2023')");
+  const ben = g.table("Leads").find(l => l.Name === "Ben Carter");
+  assert.strictEqual(ben.Stage, "Closed");
+  assert.strictEqual(ben["Year closed"], 2023);
+  await page.click(".drawer header button[aria-label=Close]");
+  await page.click("button[data-view=pipeline]");
+  assert.ok(await page.isVisible("text=Closed 2023"));
+
   await page.click("button[data-view=campaigns]");
   await page.selectOption("select[aria-label=Template]", "listings");
   await page.click("text=Preview who gets it");

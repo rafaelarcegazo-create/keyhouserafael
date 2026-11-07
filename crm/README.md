@@ -26,6 +26,7 @@ A free system to capture every lead, follow up with every person on time, and st
 | Closed (past client) | 30 days after closing, then every 3 months, plus home anniversary reminders |
 | Lost | no more reminders |
 
+- When you mark a deal **Closed**, you pick the **year it closed** (2022 up to this year), plus the exact closing date if you have it. With the exact date you also get a home anniversary reminder. Use **+ Add lead** with stage "Closed" to enter past clients from earlier years, and filter email campaigns by year closed (for example, a check-in to everyone who bought in 2023).
 - A **daily email at 7am** lists who to contact that day.
 - **Pipeline** view shows everyone by stage. **Results** shows leads per week, how fast you respond, and which sources lead to closings.
 

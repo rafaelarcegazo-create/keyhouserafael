@@ -76,8 +76,12 @@ var LEAD_FIELDS = [
   ['unsubscribed', 'Unsubscribed'], ['phoneOptOut', 'No calls/texts'],
   ['dncCheckedOn', 'DNC checked on'], ['onDnc', 'On National DNC'],
   ['tags', 'Tags'], ['message', 'First message'], ['notes', 'Notes'], ['referredBy', 'Referred by'],
-  ['token', 'Unsubscribe key']
+  ['token', 'Unsubscribe key'],
+  ['closedYear', 'Year closed']   // New columns go at the end so existing sheets keep their data in place.
 ];
+
+// Past deals can be recorded from this year up to the current year.
+var FIRST_CLOSED_YEAR = 2022;
 var DATE_FIELDS = ['created', 'updated', 'nextFollowUp', 'lastContact', 'firstResponse', 'lastInquiry', 'closedOn', 'emailConsentAt', 'phoneConsentAt', 'dncCheckedOn'];
 
 var ACTIVITY_FIELDS = [['id', 'ID'], ['leadId', 'Lead ID'], ['when', 'When'], ['type', 'Type'], ['outcome', 'Outcome'], ['details', 'Details'], ['by', 'By']];

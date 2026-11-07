@@ -11,6 +11,14 @@ var DAY = 24 * 60 * 60 * 1000;
 function isYes_(v) { return v === true || /^(yes|y|true|1|sí|si)$/i.test(String(v || '').trim()); }
 function toDate_(v) { if (!v) return null; var d = v instanceof Date ? v : new Date(v); return isNaN(d) ? null : d; }
 function addDays_(d, n) { return new Date(d.getTime() + n * DAY); }
+
+/** When the deal closed: the exact closing date, or Jan 1 of the year closed when only the year is known. */
+function closedStart_(lead) {
+  var d = toDate_(lead.closedOn);
+  if (d) return { date: d, exact: true };
+  var y = Number(lead.closedYear);
+  return y ? { date: new Date(y, 0, 1), exact: false, year: y } : null;
+}
 function phoneDigits_(p) { var d = String(p || '').replace(/\D/g, ''); return d.length === 11 && d[0] === '1' ? d.slice(1) : d; }
 
 /** When to reach out next, after the lead's latest touch. Returns a Date, or null for no more follow-up. */
@@ -27,7 +35,7 @@ function suggestNextFollowUp(lead, now) {
     case 'Active client':
     case 'Under contract': return addDays_(now, 3);
     case 'Closed':
-      var closed = toDate_(lead.closedOn);
+      var closed = toDate_(lead.closedOn);   // Only an exact date can be 30 days ago.
       if (closed && now - closed < 30 * DAY) return addDays_(closed, 30);
       return addDays_(now, 90);                             // Past clients: a personal touch every quarter.
     default: return null;                                   // Lost or unknown: no more reminders.
@@ -36,8 +44,9 @@ function suggestNextFollowUp(lead, now) {
 
 /** The relationship that lets you call a number on the National DNC list (47 CFR 64.1200(f)(5)). */
 function relationship_(lead, now) {
-  var inquiry = toDate_(lead.lastInquiry), closed = toDate_(lead.closedOn);
-  if (closed && now - closed <= 548 * DAY) return { until: addDays_(closed, 548), why: 'closed a transaction with you on ' + fmtDay_(closed) + ' (18 months)' };
+  var inquiry = toDate_(lead.lastInquiry), c = closedStart_(lead);
+  // With only the year known, count from Jan 1 so the 18 months never run longer than they really do.
+  if (c && now - c.date <= 548 * DAY) return { until: addDays_(c.date, 548), why: 'closed a transaction with you ' + (c.exact ? 'on ' + fmtDay_(c.date) : 'in ' + c.year + ' (counted from Jan 1, since the exact date is not saved)') + ' (18 months)' };
   if (inquiry && now - inquiry <= 90 * DAY) return { until: addDays_(inquiry, 90), why: 'asked you about real estate on ' + fmtDay_(inquiry) + ' (3 months)' };
   return null;
 }
@@ -81,7 +90,7 @@ function emailCheck(lead, kind, now) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(lead.email || ''))) { res.reasons.push('No valid email address.'); return res; }
   if (isYes_(lead.unsubscribed)) { res.reasons.push('They unsubscribed from email. Only reply if they write to you first.'); return res; }
   if (isYes_(lead.emailConsent)) res.basis = 'They asked to receive emails' + (toDate_(lead.emailConsentAt) ? ' on ' + fmtDay_(toDate_(lead.emailConsentAt)) : '') + '.';
-  else if (toDate_(lead.lastInquiry) || toDate_(lead.closedOn)) res.basis = 'They contacted you or worked with you.';
+  else if (toDate_(lead.lastInquiry) || closedStart_(lead)) res.basis = 'They contacted you or worked with you.';
   else if (kind === 'marketing') { res.reasons.push('No email permission and they never contacted you. Get their permission before adding them to campaigns.'); return res; }
   else res.basis = 'One-to-one email.';
   if (kind === 'marketing') res.warnings.push('Your address and an unsubscribe link are added automatically.');

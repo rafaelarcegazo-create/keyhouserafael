@@ -275,3 +275,35 @@ test("daily digest lists new and due leads", () => {
   assert.match(g.sent[0].body, /New leads not contacted yet/);
   assert.match(g.sent[0].body, /Ana Lopez/);
 });
+
+test("year closed: 2022 to this year, date wins, used for relationship and campaigns", () => {
+  const g = ready();
+  const thisYear = new Date().getFullYear();
+  assert.deepStrictEqual(g.api("bootstrap").lists.closedYears.slice(-1), [2022]);
+  assert.strictEqual(g.api("bootstrap").lists.closedYears[0], thisYear);
+  const a = g.api("saveLead", { name: "Past Client", email: "past@example.com", phone: "7025550133", stage: "Closed", closedYear: "2023" }).lead;
+  assert.strictEqual(a.stage, "Closed");
+  assert.strictEqual(a.closedYear, 2023);
+  assert.strictEqual(a.closedOn, "", "no made-up exact date");
+  assert.throws(() => g.api("saveLead", { id: a.id, closedYear: "2021" }), /from 2022/);
+  assert.throws(() => g.api("saveLead", { id: a.id, closedYear: String(thisYear + 1) }), /from 2022/);
+  const b = g.api("saveLead", { id: a.id, closedYear: "2024", closedOn: "2024-05-10T16:00:00.000Z" }).lead;
+  assert.strictEqual(b.closedYear, 2024);
+  assert.strictEqual(b.closedOn, "2024-05-10T16:00:00.000Z");
+  assert.strictEqual(g.api("saveLead", { id: a.id, closedYear: "2025" }).lead.closedOn, "", "a date from another year is cleared");
+  // Marking closed without a year still records today.
+  const c = g.api("saveLead", { name: "New Close", email: "nc@example.com" }).lead;
+  assert.strictEqual(g.api("saveLead", { id: c.id, stage: "Closed" }).lead.closedYear, thisYear);
+
+  // With only the year, the 18-month relationship counts from Jan 1 of that year.
+  const s = g.ctx.settings_();
+  const day = new Date("2026-06-20T17:00:00Z"); // 10am in Las Vegas
+  assert.strictEqual(g.ctx.phoneCheck({ phone: "7025550133", closedYear: 2025 }, day, s).ok, true);
+  assert.strictEqual(g.ctx.phoneCheck({ phone: "7025550133", closedYear: 2024 }, day, s).ok, false);
+  assert.strictEqual(g.ctx.emailCheck({ email: "a@b.co", closedYear: 2022 }, "marketing", day).ok, true);
+
+  g.setSetting("postalAddress", "123 Example Ave");
+  g.setSetting("webAppUrl", "https://x/exec");
+  assert.strictEqual(g.api("campaignPreview", { key: "pastclient", filter: { closedYear: "2025" } }).eligible, 1);
+  assert.strictEqual(g.api("campaignPreview", { key: "pastclient", filter: { closedYear: "2023" } }).eligible, 0);
+});
