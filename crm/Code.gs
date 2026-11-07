@@ -43,6 +43,7 @@ function setup() {
   var stageCol = fieldIndex_(LEAD_FIELDS, 'stage') + 1;
   leads.getRange(2, stageCol, leads.getMaxRows() - 1, 1).setDataValidation(
     SpreadsheetApp.newDataValidation().requireValueInList(STAGES, true).setAllowInvalid(false).build());
+  yearDropdown_();
 
   installTriggers();
   CACHE.settings = null;
@@ -51,10 +52,58 @@ function setup() {
 
 function installTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'dailyDigest') ScriptApp.deleteTrigger(t);
+    if (['dailyDigest', 'onSheetEdit'].indexOf(t.getHandlerFunction()) >= 0) ScriptApp.deleteTrigger(t);
   });
   var s = settings_();
   ScriptApp.newTrigger('dailyDigest').timeBased().atHour(Number(s.digestHour) || 7).everyDays(1).inTimezone(s.timeZone).create();
+  ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(ss_()).onEdit().create();
+}
+
+/** "Year closed" column in the sheet: a dropdown from 2022 to this year. Refreshed daily so a new year appears on Jan 1. */
+function yearDropdown_() {
+  var leads = sheet_('Leads'), col = fieldIndex_(LEAD_FIELDS, 'closedYear') + 1;
+  var years = closedYears_(new Date()).map(String);
+  leads.getRange(2, col, leads.getMaxRows() - 1, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(years, true).setAllowInvalid(false).build());
+}
+
+/** Changing Stage to "Closed" right in the sheet asks for the year, the same as the dashboard does. */
+function onSheetEdit(e) {
+  var r = e && e.range;
+  if (!r || r.getSheet().getName() !== 'Leads' || r.getRow() < 2 || r.getNumRows() > 1 || r.getNumColumns() > 1) return;
+  if (r.getColumn() !== fieldIndex_(LEAD_FIELDS, 'stage') + 1 || e.value !== 'Closed') return;
+  var sh = r.getSheet(), row = r.getRow();
+  var cell = function (k) { return sh.getRange(row, fieldIndex_(LEAD_FIELDS, k) + 1); };
+  if (cell('closedYear').getValue() || !cell('id').getValue()) return;
+  var id = String(cell('id').getValue()), name = String(cell('name').getValue() || 'this lead');
+  var years = closedYears_(new Date());
+  var html = '<div style="font:15px Arial,sans-serif;color:#22201d">' +
+    '<p style="margin:0 0 12px">What year did the deal with <b>' + esc_(name) + '</b> close?</p>' +
+    '<select id="y" style="font:16px Arial;padding:6px;width:100%">' + years.map(function (y) { return '<option>' + y + '</option>'; }).join('') + '</select>' +
+    '<p style="margin:16px 0 0"><button id="s" style="font:600 15px Arial;padding:8px 18px;background:#22201d;color:#fff;border:0;border-radius:6px;cursor:pointer">Save</button> ' +
+    '<button onclick="google.script.host.close()" style="font:15px Arial;padding:8px 14px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer">Later</button></p>' +
+    '<p style="color:#7a746b;font-size:13px">You can also type the exact date in the "Closed on" column for an anniversary reminder.</p></div>' +
+    '<script>document.getElementById("s").onclick=function(){this.disabled=true;google.script.run.withSuccessHandler(function(){google.script.host.close()})' +
+    '.withFailureHandler(function(e){alert(e.message)}).setClosedYearFromSheet(' + JSON.stringify(id) + ',document.getElementById("y").value)}</script>';
+  try {
+    SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(html).setWidth(360).setHeight(230), 'Year closed');
+  } catch (err) {
+    ss_().toast('Pick the year it closed in the "Year closed" column.', 'Deal closed', 10);
+  }
+}
+
+function setClosedYearFromSheet(id, year) {
+  if (!isAllowedUser_()) throw new Error('You do not have access to this CRM.');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var lead = findLead_(id), now = new Date(), y = Number(year);
+    if (!(y >= FIRST_CLOSED_YEAR && y <= now.getFullYear())) throw new Error('Pick a year from ' + FIRST_CLOSED_YEAR + ' to ' + now.getFullYear() + '.');
+    lead.closedYear = y;
+    if (toDate_(lead.closedOn) && toDate_(lead.closedOn).getFullYear() !== y) lead.closedOn = '';
+    lead.nextFollowUp = suggestNextFollowUp(lead, now) || '';
+    saveLead_(lead);
+  } finally { lock.releaseLock(); }
 }
 
 function ensureSheet_(name, fields) {
@@ -424,8 +473,8 @@ function setupWarnings_() {
   var s = settings_(), w = [];
   if (!s.postalAddress) w.push('Add your postal address on the Settings tab. The law requires it in every marketing email, so campaigns are off until it is filled in.');
   if (!s.webAppUrl) w.push('Paste your web app link (ending in /exec) into "webAppUrl" on the Settings tab so unsubscribe links work.');
-  var hasDigest = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'dailyDigest'; });
-  if (!hasDigest) w.push('The daily follow-up email is not scheduled. Run Lead CRM > Set up or repair.');
+  var handlers = ScriptApp.getProjectTriggers().map(function (t) { return t.getHandlerFunction(); });
+  if (handlers.indexOf('dailyDigest') < 0 || handlers.indexOf('onSheetEdit') < 0) w.push('Reminders are not fully set up (daily email or the year-closed question in the sheet). Run Lead CRM > Set up or repair.');
   return w;
 }
 
@@ -590,6 +639,7 @@ function campaign_(p, send) {
 // ---------- Daily follow-up email ----------
 
 function dailyDigest() {
+  try { yearDropdown_(); } catch (e) { console.error('year dropdown', e); }
   var s = settings_(), now = new Date(), tz = s.timeZone;
   var today = Utilities.formatDate(now, tz, 'yyyy-MM-dd');
   var dayOf = function (d) { return Utilities.formatDate(d, tz, 'yyyy-MM-dd'); };

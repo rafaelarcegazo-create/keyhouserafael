@@ -18,7 +18,7 @@ test("setup creates every tab, settings, templates and the daily trigger, and ca
   g.setup();
   assert.strictEqual(g.sheets.Templates.rows.length - 1, 18);
   assert.strictEqual(g.table("Settings").filter(r => r.Setting === "brokerage").length, 1);
-  assert.strictEqual(g.triggers.length, 1);
+  assert.deepStrictEqual(g.triggers.map(t => t.getHandlerFunction()).sort(), ["dailyDigest", "onSheetEdit"]);
 });
 
 test("website lead is saved, logged, alerts the agent and gets an auto-reply", () => {
@@ -306,4 +306,33 @@ test("year closed: 2022 to this year, date wins, used for relationship and campa
   g.setSetting("webAppUrl", "https://x/exec");
   assert.strictEqual(g.api("campaignPreview", { key: "pastclient", filter: { closedYear: "2025" } }).eligible, 1);
   assert.strictEqual(g.api("campaignPreview", { key: "pastclient", filter: { closedYear: "2023" } }).eligible, 0);
+});
+
+test("changing Stage to Closed in the sheet asks for the year, and saving it works", () => {
+  const g = ready({ ui: true });
+  g.post(form());
+  const sh = g.sheets.Leads, stageCol = g.ctx.fieldIndex_(g.ctx.LEAD_FIELDS, "stage") + 1;
+  const editStage = value => { sh.rows[1][stageCol - 1] = value; g.edit({ range: sh.getRange(2, stageCol), value }); };
+  editStage("Contacted");
+  assert.strictEqual(g.dialogs.length, 0, "only Closed asks");
+  editStage("Closed");
+  assert.strictEqual(g.dialogs.length, 1);
+  assert.match(g.dialogs[0].html, /What year did the deal with <b>Ana Lopez<\/b> close/);
+  assert.match(g.dialogs[0].html, /<option>2022<\/option>/);
+  assert.match(g.dialogs[0].html, new RegExp("<option>" + new Date().getFullYear() + "</option>"));
+  const id = g.table("Leads")[0].ID;
+  g.setYear(id, "2023");
+  assert.strictEqual(g.table("Leads")[0]["Year closed"], 2023);
+  assert.throws(() => g.setYear(id, "2019"), /from 2022/);
+  editStage("Closed");
+  assert.strictEqual(g.dialogs.length, 1, "no second question once the year is filled in");
+});
+
+test("without a dialog, the sheet shows a reminder instead", () => {
+  const g = ready();
+  g.post(form());
+  const sh = g.sheets.Leads, stageCol = g.ctx.fieldIndex_(g.ctx.LEAD_FIELDS, "stage") + 1;
+  sh.rows[1][stageCol - 1] = "Closed";
+  g.edit({ range: sh.getRange(2, stageCol), value: "Closed" });
+  assert.match(g.toasts[0], /Year closed/);
 });

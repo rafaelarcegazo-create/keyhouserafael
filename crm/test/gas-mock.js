@@ -27,6 +27,9 @@ function makeSheet(name, ss) {
     deleteRow(r) { rows.splice(r - 1, 1); },
     getRange(r, c, nr = 1, nc = 1) {
       const range = {
+        getSheet: () => sheet, getRow: () => r, getColumn: () => c, getNumRows: () => nr, getNumColumns: () => nc,
+        getValue: () => { const row = rows[r - 1] || []; return row[c - 1] === undefined ? "" : row[c - 1]; },
+        setValue(v) { (rows[r - 1] || (rows[r - 1] = []))[c - 1] = norm(v); return range; },
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => { const row = rows[r - 1 + i] || []; const v = row[c - 1 + j]; return v === undefined ? "" : v; })),
         setValues(vals) { vals.forEach((row, i) => { const t = rows[r - 1 + i] || (rows[r - 1 + i] = []); row.forEach((v, j) => (t[c - 1 + j] = norm(v))); }); return range; },
         setFontWeight: () => range,
@@ -39,17 +42,18 @@ function makeSheet(name, ss) {
 }
 
 function load(opts = {}) {
-  const sheets = {}, sent = [], cache = {}, props = {}, triggers = [];
+  const sheets = {}, sent = [], cache = {}, props = {}, triggers = [], dialogs = [], toasts = [];
   const user = { active: opts.activeUser === undefined ? "owner@example.com" : opts.activeUser, effective: "owner@example.com" };
   const ss = {
     getId: () => "sheet123", getUrl: () => "https://docs.google.com/spreadsheets/d/sheet123",
     getSheetByName: n => sheets[n] || null,
+    toast: (msg) => toasts.push(msg),
     insertSheet: n => (sheets[n] = makeSheet(n, ss))
   };
   const builder = () => { const b = { requireValueInList: () => b, setAllowInvalid: () => b, build: () => ({}) }; return b; };
   const ctx = {
     console, JSON, Date, Math, Number, String, Object, Array, RegExp, Error, isNaN, encodeURIComponent,
-    SpreadsheetApp: { getActive: () => ss, openById: () => ss, newDataValidation: builder, getUi: () => { throw new Error("no ui"); } },
+    SpreadsheetApp: { getActive: () => ss, openById: () => ss, newDataValidation: builder, getUi: () => { if (!opts.ui) throw new Error("no ui"); return { alert() {}, showModalDialog: (o, title) => dialogs.push({ html: o.html, title }) }; } },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => (props[k] = v) }) },
     Session: { getActiveUser: () => ({ getEmail: () => user.active }), getEffectiveUser: () => ({ getEmail: () => user.effective }) },
     Utilities: { formatDate, getUuid: () => crypto.randomUUID() },
@@ -59,7 +63,7 @@ function load(opts = {}) {
     ScriptApp: {
       getProjectTriggers: () => triggers.slice(),
       deleteTrigger: t => triggers.splice(triggers.indexOf(t), 1),
-      newTrigger: fn => { const t = { getHandlerFunction: () => fn }; const b = { timeBased: () => b, atHour: () => b, everyDays: () => b, inTimezone: () => b, create: () => (triggers.push(t), t) }; return b; },
+      newTrigger: fn => { const t = { getHandlerFunction: () => fn }; const b = { forSpreadsheet: () => b, onEdit: () => b, timeBased: () => b, atHour: () => b, everyDays: () => b, inTimezone: () => b, create: () => (triggers.push(t), t) }; return b; },
       getService: () => ({ getUrl: () => "" })
     },
     ContentService: { MimeType: { JSON: "json" }, createTextOutput: s => ({ text: s, setMimeType() { return this; } }) },
@@ -74,7 +78,9 @@ function load(opts = {}) {
   // Each Apps Script request starts with a fresh in-memory cache, like a real execution.
   const fresh = fn => (...a) => { vm.runInContext("CACHE = {}", ctx); return fn(...a); };
   return {
-    ctx, sheets, sent, cache, triggers, user,
+    ctx, sheets, sent, cache, triggers, user, dialogs, toasts,
+    edit: fresh(e => ctx.onSheetEdit(e)),
+    setYear: fresh((id, y) => ctx.setClosedYearFromSheet(id, y)),
     setup: fresh(() => ctx.setup()),
     post: fresh(body => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(body) } }).text)),
     get: fresh(params => ctx.doGet({ parameter: params || {} })),
