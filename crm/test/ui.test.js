@@ -68,6 +68,24 @@ test("website form sends the lead with consent into the CRM", async () => {
   assert.strictEqual(lead["Email consent"], "");
 });
 
+test("listing page showing request goes into the CRM with the property address", async () => {
+  const g = load(); g.setup();
+  const page = await browser.newPage();
+  await site(page, g);
+  await page.goto("https://keyhouserafael.test/listings/7942-firethorn-ln/index.html", { waitUntil: "domcontentloaded" });
+  await page.fill("#show-form input[name=name]", "Kim Lee");
+  await page.fill("#show-form input[name=email]", "kim@example.com");
+  await page.check("#show-form input[name=emailConsent]");
+  await page.waitForTimeout(2600);
+  await page.click("#show-form button[type=submit]");
+  await page.waitForFunction(() => /got your request/.test(document.getElementById("show-note").textContent));
+  if (SHOTS) await page.locator("#showing").screenshot({ path: path.join(SHOTS, "listing-form.png") });
+  const [lead] = g.table("Leads");
+  assert.strictEqual(lead.Source, "Listing page");
+  assert.strictEqual(lead["Email consent"], "Yes");
+  assert.match(g.table("Activities")[0].Details, /Firethorn/);
+});
+
 test("open house sign-in records the property and the other-agent answer, then clears", async () => {
   const g = load(); g.setup();
   const page = await browser.newPage({ viewport: { width: 820, height: 1100 } });

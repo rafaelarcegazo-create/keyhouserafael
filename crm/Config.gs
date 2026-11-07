@@ -43,7 +43,7 @@ var SETTING_HELP = {
 
 var STAGES = ['New', 'Contacted', 'Nurture', 'Appointment', 'Active client', 'Under contract', 'Closed', 'Lost'];
 var GOALS = ['buy', 'sell', 'invest', 'rent', 'other'];
-var SOURCES = ['Website', 'Open house', 'Referral', 'Past client', 'Sign call', 'Social media', 'Zillow', 'Realtor.com', 'Event', 'Sphere', 'Other'];
+var SOURCES = ['Website', 'Listing page', 'Open house', 'Referral', 'Past client', 'Sign call', 'Social media', 'Zillow', 'Realtor.com', 'Event', 'Sphere', 'Other'];
 var ACTIVITY_TYPES = ['Call', 'Text', 'Email', 'Meeting', 'Showing', 'Note'];
 var OUTCOMES = ['Talked', 'Left voicemail', 'No answer', 'Replied', 'Sent', 'Appointment set', 'Not interested'];
 

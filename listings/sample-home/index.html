@@ -149,6 +149,10 @@ a{color:inherit}
 #show-form textarea{min-height:84px;resize:vertical}
 #show-form input:focus,#show-form textarea:focus,#show-form select:focus{outline:2px solid var(--ink);outline-offset:0}
 #show-form .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#show-form label.ck{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start;font-weight:400;font-size:12.5px;line-height:1.45;color:var(--ink-2);cursor:pointer}
+#show-form label.ck input{width:16px;height:16px;margin:2px 0 0;padding:0;accent-color:var(--ink)}
+#show-form .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#show-form .tiny{font-size:12px;color:var(--stone);margin:0}
 .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card-actions .btn{padding:12px 10px}
 .note{background:var(--bone);border-left:3px solid var(--bronze);padding:10px 12px;border-radius:4px;font-size:14px}
@@ -321,6 +325,10 @@ dialog.lb::backdrop{background:rgba(0,0,0,.6)}
             </select>
           </label>
           <label><span data-i18n="sh.msg">Message (optional)</span><textarea name="message"></textarea></label>
+          <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+          <label class="ck"><input type="checkbox" name="emailConsent"><span data-i18n="sh.cEmail">Email me new listings, market updates and tips. I can unsubscribe at any time.</span></label>
+          <label class="ck"><input type="checkbox" name="phoneConsent"><span data-i18n="sh.cPhone">I agree that Rafael Arce Gazo, REALTOR® with DH Capital Realty, may call and text me about real estate at the phone number I entered, including with automated technology. Consent is not a condition of any purchase or service. Message and data rates may apply. Reply STOP to opt out.</span></label>
+          <p class="tiny"><span data-i18n="sh.fine">Both boxes are optional.</span> <a href="../../privacy.html" data-i18n="sh.privacy">Privacy notice</a></p>
           <button class="btn btn-dark" type="submit" data-i18n="sh.send">Request a showing</button>
           <p class="note" id="show-note" hidden></p>
         </form>
@@ -359,6 +367,7 @@ dialog.lb::backdrop{background:rgba(0,0,0,.6)}
   </div>
 </dialog>
 
+<script src="../../leads-config.js"></script>
 <script>
 /* =====================================================================
    EDIT THIS BLOCK FOR EACH LISTING.
@@ -424,16 +433,16 @@ const UI = {
     "ag.role":"Agente de la propiedad · REALTOR®","ag.lang":"Se habla español. Respondo en español o en inglés.",
     "sh.h":"Agenda una visita o haz una pregunta","sh.name":"Tu nombre","sh.phone":"Teléfono","sh.email":"Correo electrónico","sh.when":"¿Cuándo te gustaría verla?",
     "sh.w1":"Lo antes posible","sh.w2":"Este fin de semana","sh.w3":"Una tarde entre semana","sh.w4":"Recorrido en vivo por video",
-    "sh.msg":"Mensaje (opcional)","sh.send":"Pedir una visita",
+    "sh.msg":"Mensaje (opcional)","sh.send":"Pedir una visita","sh.cEmail":"Envíenme por correo propiedades nuevas, noticias del mercado y consejos. Puedo darme de baja en cualquier momento.","sh.cPhone":"Acepto que Rafael Arce Gazo, REALTOR® de DH Capital Realty, me llame y me envíe mensajes de texto sobre bienes raíces al teléfono que escribí, incluso con tecnología automatizada. Dar mi consentimiento no es condición para ninguna compra o servicio. Pueden aplicar cargos por mensajes y datos. Responde STOP para cancelar.","sh.fine":"Las dos casillas son opcionales.","sh.privacy":"Aviso de privacidad",
     "ft.disc":"La información se considera confiable pero no está garantizada y debe ser verificada por el comprador. Propiedad listada por DH Capital Realty, Nevada.","ft.eho":"Igualdad de oportunidades en la vivienda",
     "lb.close":"Cerrar"
   },
   words: {
     en: { beds:"Beds", baths:"Baths", sqft:"Sq ft", lot:"Lot", year:"Built", type:"Type", stories:"Stories", garage:"Garage", cars:"cars", hoa:"HOA", mo:"/mo", none:"None", ask:"Ask Rafael", mls:"MLS #", status:"Status", all:n=>`View all ${n} photos`, of:(i,n)=>`${i} of ${n}`,
-          st:{active:"For sale",pending:"Pending",sold:"Sold"}, need:"Add your name and email so Rafael can reply.", ok:"Your email app should open with your request ready to send. If it doesn't, call or text (702) 335-4952.", nomap:"The map shows on the live website.",
+          st:{active:"For sale",pending:"Pending",sold:"Sold"}, need:"Add your name and email so Rafael can reply.", sent:"Thank you! Rafael got your request and will reply soon to set up the showing.", sending:"Sending…", ok:"Your email app should open with your request ready to send. If it doesn't, call or text (702) 335-4952.", nomap:"The map shows on the live website.",
           msg:(a,w)=>`I'd like to see ${a}. Preferred time: ${w}.` },
     es: { beds:"Recámaras", baths:"Baños", sqft:"Pies²", lot:"Terreno", year:"Construida", type:"Tipo", stories:"Pisos", garage:"Garaje", cars:"autos", hoa:"HOA", mo:"/mes", none:"No tiene", ask:"Pregunta a Rafael", mls:"MLS #", status:"Estado", all:n=>`Ver las ${n} fotos`, of:(i,n)=>`${i} de ${n}`,
-          st:{active:"En venta",pending:"Pendiente",sold:"Vendida"}, need:"Escribe tu nombre y correo para que Rafael pueda responderte.", ok:"Tu aplicación de correo debería abrirse con tu solicitud lista. Si no se abre, llama o escribe al (702) 335-4952.", nomap:"El mapa se muestra en el sitio en vivo.",
+          st:{active:"En venta",pending:"Pendiente",sold:"Vendida"}, need:"Escribe tu nombre y correo para que Rafael pueda responderte.", sent:"¡Gracias! Rafael recibió tu solicitud y te responderá pronto para agendar la visita.", sending:"Enviando…", ok:"Tu aplicación de correo debería abrirse con tu solicitud lista. Si no se abre, llama o escribe al (702) 335-4952.", nomap:"El mapa se muestra en el sitio en vivo.",
           msg:(a,w)=>`Me gustaría ver ${a}. Horario preferido: ${w}.` }
   }
 };
@@ -536,14 +545,28 @@ document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click
 try { if (localStorage.getItem("rag-lang") === "es") lang = "es"; } catch (e) {}
 render();
 
-// Showing request: opens the visitor's own email app (free, no form service).
-$("show-form").addEventListener("submit", e => {
+// Showing request: goes straight into the Lead CRM (link in leads-config.js); otherwise opens the visitor's email app.
+const showStart = Date.now();
+$("show-form").addEventListener("submit", async e => {
   e.preventDefault();
-  const f = e.target, note = $("show-note"), w = UI.words[lang];
+  const f = e.target, note = $("show-note"), w = UI.words[lang], LEADS_URL = window.LEADS_URL || "";
   const ok = f.elements.name.value.trim() && /\S+@\S+\.\S+/.test(f.elements.email.value);
-  note.dataset.key = ok ? "ok" : "need"; note.textContent = w[note.dataset.key]; note.hidden = false;
+  const say = k => { note.dataset.key = k; note.textContent = w[k]; note.hidden = false; };
+  say(ok ? (LEADS_URL ? "sending" : "ok") : "need");
   if (!ok) return;
   const when = f.elements.when.options[f.elements.when.selectedIndex].text;
+  if (LEADS_URL) {
+    const data = { name: f.elements.name.value, email: f.elements.email.value, phone: f.elements.phone.value, goal: "buy",
+      message: [w.msg(fullAddr(), when), f.elements.message.value].filter(Boolean).join("\n"), property: fullAddr(),
+      emailConsent: f.elements.emailConsent.checked, phoneConsent: f.elements.phoneConsent.checked,
+      website: f.elements.website.value, elapsed: Date.now() - showStart, language: lang,
+      source: "Listing page", page: location.href, userAgent: navigator.userAgent };
+    try {
+      const r = await fetch(LEADS_URL, { method: "POST", body: JSON.stringify(data) }).then(r => r.json());
+      if (r.ok) { say("sent"); f.reset(); return; }
+    } catch (err) { /* fall through to the email app */ }
+    say("ok");
+  }
   const body = [w.msg(fullAddr(), when), f.elements.message.value, "", f.elements.name.value, f.elements.email.value, f.elements.phone.value].join("\n");
   const a = document.createElement("a");
   a.href = "mailto:rafaelarcegazo@gmail.com?subject=" + encodeURIComponent("Showing request: " + fullAddr()) + "&body=" + encodeURIComponent(body);
