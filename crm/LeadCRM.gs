@@ -11,7 +11,7 @@
 var DEFAULTS = {
   agentName: 'Rafael Arce Gazo',
   agentTitle: 'REALTOR®',
-  brokerage: 'DH Capital Realty',
+  brokerage: 'United Realty Group',
   license: 'S.0195953',
   phone: '(702) 335-4952',
   email: 'rafaelarcegazo@gmail.com',
@@ -63,8 +63,8 @@ var CONSENT_TEXT = {
     es: 'Envíenme por correo propiedades nuevas, noticias del mercado y consejos. Puedo darme de baja en cualquier momento.'
   },
   phone: {
-    en: 'I agree that Rafael Arce Gazo, REALTOR® with DH Capital Realty, may call and text me about real estate at the phone number I entered, including with automated technology. Consent is not a condition of any purchase or service. Message and data rates may apply. Reply STOP to opt out.',
-    es: 'Acepto que Rafael Arce Gazo, REALTOR® de DH Capital Realty, me llame y me envíe mensajes de texto sobre bienes raíces al teléfono que escribí, incluso con tecnología automatizada. Dar mi consentimiento no es condición para ninguna compra o servicio. Pueden aplicar cargos por mensajes y datos. Responde STOP para cancelar.'
+    en: 'I agree that Rafael Arce Gazo, REALTOR® with United Realty Group, may call and text me about real estate at the phone number I entered, including with automated technology. Consent is not a condition of any purchase or service. Message and data rates may apply. Reply STOP to opt out.',
+    es: 'Acepto que Rafael Arce Gazo, REALTOR® de United Realty Group, me llame y me envíe mensajes de texto sobre bienes raíces al teléfono que escribí, incluso con tecnología automatizada. Dar mi consentimiento no es condición para ninguna compra o servicio. Pueden aplicar cargos por mensajes y datos. Responde STOP para cancelar.'
   }
 };
 

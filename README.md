@@ -5,7 +5,7 @@ A one-page bilingual (English / Spanish) website. It is plain HTML with no paid 
 ## Files
 - `index.html`: the whole site (text, styles, and the English/Spanish switch)
 - `img/rafael-portrait.jpg`, `img/rafael-wide.jpg`: headshots
-- `img/dh-capital-realty.png`: brokerage logo
+- `img/united-realty-group.png`: brokerage logo
 - `img/rafael-seated.jpg`: About section portrait
 - `media/*.mp4` and `*-poster.jpg`: the two short videos (muted, compressed for the web) and their still frames
 - `leads-config.js`: the link to your Lead CRM
@@ -38,7 +38,7 @@ The form has two optional permission boxes (emails, and calls/texts) with the wo
 Each English text has a `data-i18n` key. Its Spanish version is in the `T.es` list near the bottom of `index.html` under the same key. Change both when editing.
 
 ## Before going live
-Nevada advertising rules generally require the brokerage name to appear clearly. It is shown in the header, contact section, and footer. Ask DH Capital Realty if they need anything else on the site, such as the brokerage's address or phone.
+Nevada advertising rules generally require the brokerage name to appear clearly. It is shown in the header, contact section, and footer. Ask United Realty Group if they need anything else on the site, such as the brokerage's address or phone.
 
 ## Booking calendar (free)
 1. In Google Calendar (rafaelarcegazo@gmail.com), click Create > Appointment schedule.
@@ -56,7 +56,7 @@ Visitors then see your live open times and book directly. Google sends the confi
   4. Update the `<title>` and `og:` lines at the top so the link looks right when shared.
   5. The page is then live at `keyhouserafael.realtor/listings/1234-desert-rose-ave/`.
 - Showing requests open the visitor's email app addressed to rafaelarcegazo@gmail.com (free, like the contact form).
-- Check with DH Capital Realty and the MLS rules before publishing listing photos and details.
+- Check with United Realty Group and the MLS rules before publishing listing photos and details.
 
 ### Current listing
 - `listings/7942-firethorn-ln/`: 7942 Firethorn Ln, Las Vegas, NV 89123 · $539,999 · MLS# 2829947. Photos are in its `photos` folder. When it goes pending or sells, change `status` in its `LISTING` block and the tag on its card in `index.html`.
