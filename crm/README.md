@@ -44,7 +44,7 @@ A free system to capture every lead, follow up with every person on time, and st
 4. **Turn on lead capture.** Click **Deploy > New deployment**, choose type **Web app**, set **Execute as: Me** and **Who has access: Anyone**, and click **Deploy**. Copy the **Web app URL** (it ends in `/exec`).
    - Paste it in the sheet's **Settings** tab, in the `webAppUrl` row.
    - Paste it in `leads-config.js` on your website, between the quotes: `window.LEADS_URL = "https://script.google.com/macros/s/…/exec";` and publish the site.
-5. **Add your postal address.** In the **Settings** tab, fill in `postalAddress`. Federal law requires a real postal address in every marketing email. Ask DH Capital Realty which address to use (usually the brokerage office). Campaigns stay off until this is filled in.
+5. **Add your postal address.** In the **Settings** tab, fill in `postalAddress`. Federal law requires a real postal address in every marketing email. Ask United Realty Group which address to use (usually the brokerage office). Campaigns stay off until this is filled in.
 6. **Test it.** Send yourself a message from the contact form on your website. Within a minute you should see the lead in the **Leads** tab, get the alert email, and get the thank-you email.
 
 Open the dashboard any time from the sheet: **Lead CRM > Open dashboard** (reload the sheet once after setup for the menu to appear).
@@ -66,7 +66,7 @@ Open the dashboard any time from the sheet: **Lead CRM > Open dashboard** (reloa
 
 ## The laws it follows
 
-The system blocks or warns you before you break these rules. It is a practical guide, not legal advice. **Ask your broker at DH Capital Realty to review it before you start**, because brokerages often have their own policies.
+The system blocks or warns you before you break these rules. It is a practical guide, not legal advice. **Ask your broker at United Realty Group to review it before you start**, because brokerages often have their own policies.
 
 **Calls and texts (federal TCPA and Do Not Call rules).** Texts count as calls.
 - Only between 8am and 9pm in the person's time zone. The Call and Text buttons turn off outside those hours.
@@ -76,7 +76,7 @@ The system blocks or warns you before you break these rules. It is a practical g
   - a check of their number on the National Do Not Call Registry in the last 31 days showing they are not on it. Get registry access through your brokerage, or at [telemarketing.donotcall.gov](https://telemarketing.donotcall.gov) (the first 5 area codes are free). Then press "Not on the list" or "On the list" in the lead.
 - Anyone who says stop (including replying STOP): press **They asked to stop calls/texts** immediately. They go on your internal do-not-call list for good.
 - Texts are sent one at a time from your own phone. The CRM deliberately does not send mass or automated texts: that needs written consent from each person and a registered texting service (10DLC).
-- Identify yourself and DH Capital Realty at the start of every call, and keep caller ID on.
+- Identify yourself and United Realty Group at the start of every call, and keep caller ID on.
 - If the phone number on a lead changes, the call/text consent is removed, because consent belongs to the number.
 
 **Email (CAN-SPAM and Nevada NRS 41.705–41.735).**
@@ -85,7 +85,7 @@ The system blocks or warns you before you break these rules. It is a practical g
 - Campaigns only go to people who said yes on your site, or who contacted or worked with you. Don't add bought or scraped email lists.
 - Google limits free Gmail accounts to about 100 emails a day. The campaign screen shows how many you have left and stops at the limit.
 
-**Nevada real estate advertising (NRS 645 / NAC 645.610).** Your emails and pages show DH Capital Realty as your brokerage.
+**Nevada real estate advertising (NRS 645 / NAC 645.610).** Your emails and pages show United Realty Group as your brokerage.
 
 **Fair housing (federal Fair Housing Act and NRS 118).** The CRM has no fields for protected traits. Keep notes about the home a person wants, never about who they are (family, religion, origin, disability, and so on). Avoid phrases like "perfect for families" or "safe area".
 

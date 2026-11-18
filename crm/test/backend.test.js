@@ -39,7 +39,7 @@ test("website lead is saved, logged, alerts the agent and gets an auto-reply", (
   assert.match(g.sent[0].subject, /New lead: Ana Lopez/);
   assert.strictEqual(g.sent[1].to, "ana@example.com");
   assert.match(g.sent[1].body, /Equal Housing Opportunity/);
-  assert.match(g.sent[1].body, /DH Capital Realty/);
+  assert.match(g.sent[1].body, /United Realty Group/);
   // The auto-reply must not count as Rafael's own first contact.
   assert.strictEqual(Number(g.table("Leads")[0].Attempts), 0);
 });
